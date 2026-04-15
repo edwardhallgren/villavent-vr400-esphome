@@ -1,0 +1,202 @@
+esphome:
+  name: villavent-vr400
+  friendly_name: Villavent VR 400
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Villavent Fallback"
+    password: YOUR_FALLBACK_PASSWORD_HERE
+
+captive_portal:
+
+logger:
+
+api:
+  encryption:
+    key: YOUR_API_KEY_HERE
+
+ota:
+  - platform: esphome
+    password: YOUR_OTA_PASSWORD_HERE
+
+# ─── Outputs: Button Simulation (300ms pulse via optocoupler) ─────────────────
+
+output:
+  - platform: gpio
+    pin: GPIO5
+    id: out_fan_up
+
+  - platform: gpio
+    pin: GPIO17
+    id: out_fan_down
+
+  - platform: gpio
+    pin: GPIO16
+    id: out_temp_up
+
+  - platform: gpio
+    pin: GPIO4
+    id: out_temp_down
+
+# ─── Buttons: Exposed to Home Assistant ──────────────────────────────────────
+
+button:
+  - platform: template
+    name: "Fan Speed UP"
+    on_press:
+      - output.turn_on: out_fan_up
+      - delay: 300ms
+      - output.turn_off: out_fan_up
+
+  - platform: template
+    name: "Fan Speed DOWN"
+    on_press:
+      - output.turn_on: out_fan_down
+      - delay: 300ms
+      - output.turn_off: out_fan_down
+
+  - platform: template
+    name: "Temperature UP"
+    on_press:
+      - output.turn_on: out_temp_up
+      - delay: 300ms
+      - output.turn_off: out_temp_up
+
+  - platform: template
+    name: "Temperature DOWN"
+    on_press:
+      - output.turn_on: out_temp_down
+      - delay: 300ms
+      - output.turn_off: out_temp_down
+
+# ─── Binary Sensors: LED Reading (pullup + inverted) ─────────────────────────
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO25
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Fan Speed MAX"
+    id: fan_max
+
+  - platform: gpio
+    pin:
+      number: GPIO26
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Fan Speed NORMAL"
+    id: fan_normal
+
+  - platform: gpio
+    pin:
+      number: GPIO27
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Fan Speed MIN"
+    id: fan_min
+
+  - platform: gpio
+    pin:
+      number: GPIO32
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Temp Lamp 6"
+    id: temp_lamp6
+    internal: true
+
+  - platform: gpio
+    pin:
+      number: GPIO33
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Temp Lamp 7"
+    id: temp_lamp7
+    internal: true
+
+  - platform: gpio
+    pin:
+      number: GPIO15
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Temp Lamp 8"
+    id: temp_lamp8
+    internal: true
+
+  # Optional — comment out if not yet wired
+  - platform: gpio
+    pin:
+      number: GPIO13
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Elpatron Aktiv"
+
+  - platform: gpio
+    pin:
+      number: GPIO14
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Sommarläge"
+
+  - platform: gpio
+    pin:
+      number: GPIO12
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Filterbyte"
+
+# ─── Sensors: Derived State ───────────────────────────────────────────────────
+
+text_sensor:
+  - platform: template
+    name: "Fläkthastighet"
+    update_interval: 1s
+    lambda: |-
+      if (id(fan_max).state)    return {"MAX"};
+      if (id(fan_normal).state) return {"NORMAL"};
+      if (id(fan_min).state)    return {"MIN"};
+      return {"OKÄND"};
+
+sensor:
+  - platform: template
+    name: "Temperaturinställning"
+    update_interval: 1s
+    accuracy_decimals: 0
+    unit_of_measurement: ""
+    icon: "mdi:thermometer"
+    lambda: |-
+      bool l6 = id(temp_lamp6).state;
+      bool l7 = id(temp_lamp7).state;
+      bool l8 = id(temp_lamp8).state;
+      if (!l6 && !l7 && !l8) return 0;
+      if ( l6 && !l7 && !l8) return 1;
+      if ( l6 &&  l7 && !l8) return 2;
+      if (!l6 &&  l7 && !l8) return 3;
+      if (!l6 &&  l7 &&  l8) return 4;
+      if (!l6 && !l7 &&  l8) return 5;
+      return -1;
