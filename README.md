@@ -1,12 +1,21 @@
 # Villavent VR 400/E3 — ESPHome Control via ESP32
 
+<p align="center">
+  <img src="images/control-panel.jpg" alt="Villavent VR 400/E3 control panel" width="220">
+</p>
+
 Control your Villavent VR 400/E3 ventilation unit using an ESP32 and ESPHome, integrated with Home Assistant. Instead of modifying the original electronics, this project uses **optocouplers** to simulate button presses and read LED status indicators — keeping the original control board fully intact.
 
 ## How It Works
 
-The Villavent VR 400/E3 has a physical control panel with buttons (fan speed up/down, temperature up/down) and LEDs indicating the current mode. This project taps into those signals using optocouplers in two ways:
+The Villavent VR 400/E3 has a physical wall-mounted control panel (pictured above) with:
+- **Fan speed buttons** (▲/▼) and indicator LEDs for Max / Norm / Min
+- **Temperature buttons** (▲/▼) and a 5-dot LED bar showing the current setpoint (levels 0–5)
+- A **Summer mode** indicator and a **Filter change** alert LED
 
-**Outputs (simulating button presses):** An optocoupler is connected in parallel with each button. When the ESP32 briefly pulls the GPIO high (300ms pulse), the optocoupler closes the circuit — identical to a physical button press.
+This project taps into those signals using optocouplers in two ways, without touching the original electronics:
+
+**Outputs (simulating button presses):** An optocoupler is connected in parallel with each button. When the ESP32 briefly pulls the GPIO high (300 ms pulse), the optocoupler closes the circuit — identical to a physical button press.
 
 **Inputs (reading LED state):** An optocoupler is connected across each status LED. When the LED lights up, it drives the optocoupler which pulls the ESP32 GPIO low (inputs are configured with pullup + inverted).
 
