@@ -73,7 +73,7 @@ This decoding runs as a template sensor in ESPHome, updating every second.
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/villavent-vr400-esphome.git
+   git clone https://github.com/edwardhallgren/villavent-vr400-esphome.git
    cd villavent-vr400-esphome
    ```
 
@@ -107,6 +107,67 @@ Three additional binary sensors (Electric heater, Summer mode, Filter change) ar
     name: "Elpatron Aktiv"
     ...
 ```
+
+## Home Assistant Dashboard
+
+A ready-made Lovelace card is included in [`lovelace-card.yaml`](lovelace-card.yaml). It provides:
+
+- Status chips for Summer mode, Electric heater, and Filter alert
+- One-tap fan speed presets (Min / Normal / Max) with active-state highlighting
+- Current fan speed display
+- Step-by-step fan and temperature nudge buttons
+- Boost mode (20 min at MAX) with a live countdown bar that cancels on tap
+
+![Dashboard preview showing fan speed control, boost button, and temperature level selector](https://raw.githubusercontent.com/edwardhallgren/villavent-vr400-esphome/main/lovelace-card.yaml)
+
+### Required HACS Frontend Integrations
+
+Install these via HACS → Frontend before adding the card:
+
+| Integration | Repository |
+|---|---|
+| Mushroom | `piitaya/lovelace-mushroom` |
+| card-mod | `thomasloven/lovelace-card-mod` |
+| timer-bar-card | `rianadon/timer-bar-card` |
+
+### Entity Naming
+
+The card expects entity IDs with a `vr_` prefix (e.g. `binary_sensor.vr_flakt_lage_max`). This means the ESPHome device must be named **`vr`** in `vr.yaml`:
+
+```yaml
+esphome:
+  name: vr
+```
+
+If you use a different device name, do a find-and-replace on the `vr_` prefix in `lovelace-card.yaml`.
+
+### Additional HA Helpers Required
+
+The card calls scripts and a timer that you need to create manually in Home Assistant (Settings → Automations & Scenes):
+
+**Timer**
+
+| Entity | Duration |
+|---|---|
+| `timer.villavent_boost_timer` | 20 minutes |
+
+**Scripts**
+
+| Entity | Purpose |
+|---|---|
+| `script.set_fan_to_min` | Press Fan DOWN until MIN LED is on |
+| `script.set_fan_to_normal` | Press until NORMAL LED is on |
+| `script.set_fan_to_max_2` | Press Fan UP until MAX LED is on |
+| `script.set_temp_to_0` … `script.set_temp_to_5` | Press Temp UP/DOWN until the target level sensor matches |
+| `script.villavent_boost_20min` | Set fan to MAX and start `timer.villavent_boost_timer` |
+
+Each script reads the current sensor state and presses the UP or DOWN button the required number of times to reach the target level.
+
+### Adding the Card
+
+1. Open your dashboard in edit mode.
+2. Click **Add Card → Manual**.
+3. Paste the full contents of `lovelace-card.yaml` (excluding the comment header lines starting with `##`).
 
 ## Hardware Notes
 
