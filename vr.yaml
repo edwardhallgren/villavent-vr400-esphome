@@ -1,40 +1,40 @@
 esphome:
-  name: villavent-vr400
-  friendly_name: Villavent VR 400
+  name: vr
+  friendly_name: VR
 
 esp32:
-  board: esp32dev
+  board: esp32-s3-devkitc-1
   framework:
-    type: arduino
-
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-  ap:
-    ssid: "Villavent Fallback"
-    password: YOUR_FALLBACK_PASSWORD_HERE
-
-captive_portal:
+    type: esp-idf
 
 logger:
 
 api:
   encryption:
-    key: YOUR_API_KEY_HERE
+    key: !secret api_key
 
 ota:
   - platform: esphome
-    password: YOUR_OTA_PASSWORD_HERE
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Vr Fallback Hotspot"
+    password: !secret fallback_password
+
+captive_portal:
 
 # ─── Outputs: Button Simulation (300ms pulse via optocoupler) ─────────────────
 
 output:
   - platform: gpio
-    pin: GPIO5
+    pin: GPIO11
     id: out_fan_up
 
   - platform: gpio
-    pin: GPIO17
+    pin: GPIO10
     id: out_fan_down
 
   - platform: gpio
