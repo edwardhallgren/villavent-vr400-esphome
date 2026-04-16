@@ -26,55 +26,45 @@ wifi:
 
 captive_portal:
 
-# ─── Outputs: Button Simulation (300ms pulse via optocoupler) ─────────────────
+# ─── Switches: Button Simulation (300ms pulse via optocoupler) ───────────────
+# Uses switch + auto-off so HA can call switch.turn_on directly
 
-output:
+switch:
   - platform: gpio
     pin: GPIO11
-    id: out_fan_up
+    id: sw_fan_up
+    name: "Fläkt Upp"
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - delay: 300ms
+      - switch.turn_off: sw_fan_up
 
   - platform: gpio
     pin: GPIO10
-    id: out_fan_down
+    id: sw_fan_down
+    name: "Fläkt Ned"
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - delay: 300ms
+      - switch.turn_off: sw_fan_down
 
   - platform: gpio
     pin: GPIO16
-    id: out_temp_up
+    id: sw_temp_up
+    name: "Temp Upp"
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - delay: 300ms
+      - switch.turn_off: sw_temp_up
 
   - platform: gpio
     pin: GPIO4
-    id: out_temp_down
-
-# ─── Buttons: Exposed to Home Assistant ──────────────────────────────────────
-
-button:
-  - platform: template
-    name: "Fan Speed UP"
-    on_press:
-      - output.turn_on: out_fan_up
+    id: sw_temp_down
+    name: "Temp Ned"
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
       - delay: 300ms
-      - output.turn_off: out_fan_up
-
-  - platform: template
-    name: "Fan Speed DOWN"
-    on_press:
-      - output.turn_on: out_fan_down
-      - delay: 300ms
-      - output.turn_off: out_fan_down
-
-  - platform: template
-    name: "Temperature UP"
-    on_press:
-      - output.turn_on: out_temp_up
-      - delay: 300ms
-      - output.turn_off: out_temp_up
-
-  - platform: template
-    name: "Temperature DOWN"
-    on_press:
-      - output.turn_on: out_temp_down
-      - delay: 300ms
-      - output.turn_off: out_temp_down
+      - switch.turn_off: sw_temp_down
 
 # ─── Binary Sensors: LED Reading (pullup + inverted) ─────────────────────────
 
