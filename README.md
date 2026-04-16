@@ -29,43 +29,69 @@ This approach means zero direct electrical connection between the ESP32 and the 
 - Full Home Assistant integration via ESPHome API
 - OTA firmware updates
 
+## FFC Connector Pinout
+
+The control panel connects to the main unit via a 16-pin FFC (flat flexible cable). This is where you tap in with optocouplers.
+
+| FFC Pin | Signal              | Type   | Notes                        |
+|---------|---------------------|--------|------------------------------|
+| 1       | Fan DOWN            | Button |                              |
+| 2       | Temp UP             | Button |                              |
+| 3       | Temp DOWN           | Button |                              |
+| 4       | Timer (tidur)       | Button | Not used in this project     |
+| 5       | Common (GND)        | Button | Shared return for all buttons |
+| 6       | Fan UP              | Button |                              |
+| 7       | Fan LED — MAX       | LED    |                              |
+| 8       | Fan LED — NORMAL    | LED    |                              |
+| 9       | Fan LED — MIN       | LED    |                              |
+| 10      | Electric heater LED | LED    | Optional                     |
+| 11      | Summer mode LED     | LED    | Optional                     |
+| 12      | Temp level 3 LED    | LED    | = Lamp 8 in ESPHome          |
+| 13      | Temp level 2 LED    | LED    | = Lamp 7 in ESPHome          |
+| 14      | Temp level 1 LED    | LED    | = Lamp 6 in ESPHome          |
+| 15      | Filter change LED   | LED    | Optional                     |
+| 16      | VCC for LEDs        | Power  | LED supply voltage           |
+
+For **button outputs**: connect the optocoupler output (collector/emitter) between the FFC pin and pin 5 (common).  
+For **LED inputs**: connect the optocoupler LED side between the FFC signal pin and pin 16 (VCC), with a current-limiting resistor in series.
+
 ## Pin Mapping
 
-### Outputs — Button Simulation
+### Outputs — Button Simulation (ESP32-S3 → FFC)
 
-| Function       | GPIO |
-|----------------|------|
-| Fan UP         | 5    |
-| Fan DOWN       | 17   |
-| Temp UP        | 16   |
-| Temp DOWN      | 4    |
+| Function  | GPIO  | FFC Pin |
+|-----------|-------|---------|
+| Fan UP    | 11    | 6       |
+| Fan DOWN  | 10    | 1       |
+| Temp UP   | 16    | 2       |
+| Temp DOWN | 4     | 3       |
 
-### Inputs — LED Reading
+### Inputs — LED Reading (FFC → ESP32-S3)
 
-| Function              | GPIO | Notes                        |
-|-----------------------|------|------------------------------|
-| Fan speed MAX         | 25   | Pullup, inverted             |
-| Fan speed NORMAL      | 26   | Pullup, inverted             |
-| Fan speed MIN         | 27   | Pullup, inverted             |
-| Temp lamp 6 (left)    | 32   | Pullup, inverted             |
-| Temp lamp 7 (center)  | 33   | Pullup, inverted             |
-| Temp lamp 8 (right)   | 15   | Pullup, inverted             |
-| Electric heater active| 13   | Optional — comment out if not wired |
-| Summer mode           | 14   | Optional — comment out if not wired |
-| Filter change alert   | 12   | Optional — comment out if not wired |
+| Function              | GPIO | FFC Pin | Notes                               |
+|-----------------------|------|---------|-------------------------------------|
+| Fan speed MAX         | 35   | 7       | Pullup, inverted                    |
+| Fan speed NORMAL      | 36   | 8       | Pullup, inverted                    |
+| Fan speed MIN         | 37   | 9       | Pullup, inverted                    |
+| Temp lamp 6 (level 1) | 38   | 14      | Pullup, inverted                    |
+| Temp lamp 7 (level 2) | 39   | 13      | Pullup, inverted                    |
+| Temp lamp 8 (level 3) | 15   | 12      | Pullup, inverted                    |
+| Electric heater       | 13   | 10      | Optional — comment out if not wired |
+| Summer mode           | 14   | 11      | Optional — comment out if not wired |
+| Filter change         | 12   | 15      | Optional — comment out if not wired |
 
 ## Temperature Level Decoding
 
-The VR 400/E3 uses a 3-LED combination to indicate one of 6 temperature setpoints:
+The VR 400/E3 uses a 3-LED combination (FFC pins 12–14) to indicate one of 6 temperature setpoints:
 
-| Level | Lamp 6 | Lamp 7 | Lamp 8 |
-|-------|--------|--------|--------|
-| 0     | OFF    | OFF    | OFF    |
-| 1     | ON     | OFF    | OFF    |
-| 2     | ON     | ON     | OFF    |
-| 3     | OFF    | ON     | OFF    |
-| 4     | OFF    | ON     | ON     |
-| 5     | OFF    | OFF    | ON     |
+| Level | Lamp 6 (FFC 14) | Lamp 7 (FFC 13) | Lamp 8 (FFC 12) |
+|-------|-----------------|-----------------|-----------------|
+| 0     | OFF             | OFF             | OFF             |
+| 1     | ON              | OFF             | OFF             |
+| 2     | ON              | ON              | OFF             |
+| 3     | OFF             | ON              | OFF             |
+| 4     | OFF             | ON              | ON              |
+| 5     | OFF             | OFF             | ON              |
 
 This decoding runs as a template sensor in ESPHome, updating every second.
 
@@ -86,16 +112,14 @@ This decoding runs as a template sensor in ESPHome, updating every second.
    cd villavent-vr400-esphome
    ```
 
-2. Create a `secrets.yaml` file in the same directory:
+2. Copy `secrets.yaml.example` to `secrets.yaml` and fill in your values:
    ```yaml
    wifi_ssid: "YourWiFiName"
    wifi_password: "YourWiFiPassword"
+   api_key: "generate with: esphome generate-api-key"
+   ota_password: "choose a password"
+   fallback_password: "choose a password"
    ```
-
-3. Replace the placeholder values in `vr.yaml`:
-   - `YOUR_API_KEY_HERE` with your ESPHome API encryption key (generate one with `esphome generate-api-key`)
-   - `YOUR_OTA_PASSWORD_HERE` with a password for OTA updates
-   - `YOUR_FALLBACK_PASSWORD_HERE` with a fallback hotspot password
 
 4. Flash the ESP32:
    ```bash
