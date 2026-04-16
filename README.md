@@ -70,9 +70,9 @@ For **LED inputs**: connect the optocoupler LED side between the FFC signal pin 
 
 | Function              | GPIO | FFC Pin | Notes                               |
 |-----------------------|------|---------|-------------------------------------|
-| Fan speed MAX         | 35   | 7       | Pullup, inverted                    |
-| Fan speed NORMAL      | 36   | 8       | Pullup, inverted                    |
-| Fan speed MIN         | 37   | 9       | Pullup, inverted                    |
+| Fan speed MAX         | 40   | 7       | Pullup, inverted                    |
+| Fan speed NORMAL      | 41   | 8       | Pullup, inverted                    |
+| Fan speed MIN         | 42   | 9       | Pullup, inverted                    |
 | Temp lamp 6 (level 1) | 38   | 14      | Pullup, inverted                    |
 | Temp lamp 7 (level 2) | 39   | 13      | Pullup, inverted                    |
 | Temp lamp 8 (level 3) | 15   | 12      | Pullup, inverted                    |

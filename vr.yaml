@@ -81,7 +81,7 @@ button:
 binary_sensor:
   - platform: gpio
     pin:
-      number: GPIO35
+      number: GPIO40
       mode:
         input: true
         pullup: true
@@ -91,7 +91,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO36
+      number: GPIO41
       mode:
         input: true
         pullup: true
@@ -101,7 +101,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO37
+      number: GPIO42
       mode:
         input: true
         pullup: true
