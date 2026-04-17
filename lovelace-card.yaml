@@ -64,7 +64,7 @@ cards:
         content: Filter
         icon_color: >-
           {{ 'red' if is_state('binary_sensor.vr_filter_byte', 'on') else
-          'green' }}
+          'grey' }}
         tap_action:
           action: more-info
           entity: binary_sensor.vr_filter_byte
@@ -99,26 +99,6 @@ cards:
           action: perform-action
           perform_action: script.set_fan_to_max_2
     alignment: center
-  - type: custom:mushroom-template-card
-    primary: "{{ states('sensor.vr_flakt_aktuellt_lage') }}"
-    secondary: Aktuellt fläktläge
-    icon: mdi:fan
-    icon_color: >-
-      {% if is_state('binary_sensor.vr_flakt_lage_max', 'on') %} red {% elif
-      is_state('binary_sensor.vr_flakt_lage_normal', 'on') %} orange {% elif
-      is_state('binary_sensor.vr_flakt_lage_min', 'on') %} green {% else %} grey
-      {% endif %}
-    layout: vertical
-    card_mod:
-      style: |
-        ha-card {
-          text-align: center;
-          background: rgba(255,255,255,0.05);
-        }
-        .primary {
-          font-size: 24px !important;
-          font-weight: bold !important;
-        }
   - type: conditional
     conditions:
       - condition: state
@@ -237,46 +217,6 @@ cards:
           action: perform-action
           perform_action: script.set_temp_to_5
     alignment: center
-  - type: custom:mushroom-template-card
-    primary: |-
-      {% if is_state('sensor.vr_temp_aktuellt_lage', '0') %}
-        Läge 0 - Sommardrift
-      {% else %}
-        Läge {{ states('sensor.vr_temp_aktuellt_lage') }}
-      {% endif %}
-    secondary: |-
-      {% if is_state('sensor.vr_temp_aktuellt_lage', '0') %}
-        Manuell kyla (ingen uppvärmning)
-      {% elif is_state('sensor.vr_temp_aktuellt_lage', '1') %}
-        Kallast (mest energieffektivt)
-      {% elif is_state('sensor.vr_temp_aktuellt_lage', '2') %}
-        Kallt (rekommenderat vinter)
-      {% elif is_state('sensor.vr_temp_aktuellt_lage', '3') %}
-        Normal
-      {% elif is_state('sensor.vr_temp_aktuellt_lage', '4') %}
-        Varmt
-      {% elif is_state('sensor.vr_temp_aktuellt_lage', '5') %}
-        Varmast (endast vid extremkyla)
-      {% else %}
-        Okänt läge
-      {% endif %}
-    icon: mdi:thermometer
-    icon_color: >-
-      {% set temp = states('sensor.vr_temp_aktuellt_lage') %} {% if temp == '0'
-      %} light-blue {% elif temp == '1' %} blue {% elif temp == '2' %} cyan {%
-      elif temp == '3' %} green {% elif temp == '4' %} orange {% elif temp ==
-      '5' %} red {% else %} grey {% endif %}
-    layout: vertical
-    card_mod:
-      style: |
-        ha-card {
-          text-align: center;
-          background: rgba(255,255,255,0.05);
-        }
-        .primary {
-          font-size: 20px !important;
-          font-weight: bold !important;
-        }
   - type: markdown
     content: |
       ### 🔧 Admin — Filterbyte
