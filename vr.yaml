@@ -149,7 +149,7 @@ button:
     on_press:
       - output.turn_on: out_tidur
       - output.turn_on: out_temp_up
-      - delay: 5s
+      - delay: 300ms
       - output.turn_off: out_tidur
       - output.turn_off: out_temp_up
 
@@ -159,7 +159,7 @@ button:
     on_press:
       - output.turn_on: out_tidur
       - output.turn_on: out_temp_down
-      - delay: 5s
+      - delay: 300ms
       - output.turn_off: out_tidur
       - output.turn_off: out_temp_down
 
