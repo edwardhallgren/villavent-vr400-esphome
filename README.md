@@ -11,7 +11,7 @@ Control your Villavent VR 400/E3 ventilation unit using an ESP32 and ESPHome, in
 This project started when the original wall panel stopped responding entirely. The culprit was the FFC (flat flexible cable) connector: it had worked loose from the panel PCB. The back of the board (below) shows the connector at the bottom edge and the traces running up to each button and LED.
 
 <p align="center">
-  <img src="images/ce_panel.jpg" alt="Back of the Villavent control panel PCB showing the FFC connector" width="220">
+  <img src="images/panel-pcb.jpg" alt="Back of the Villavent control panel PCB showing the FFC connector" width="220">
 </p>
 
 Rather than waiting for a replacement part, I re-soldered directly to the FFC connector pads on the back of the PCB. With the cable firmly re-attached and the panel working again, it was a natural step to add ESP32-based smart control at the same time — tapping into the same signals with optocouplers to keep the original board completely unmodified.
