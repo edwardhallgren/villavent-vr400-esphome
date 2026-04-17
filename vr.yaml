@@ -65,10 +65,95 @@ globals:
     restore_value: no
     initial_value: 'false'
 
+  - id: filter_target_manader
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+  - id: nav_steps
+    type: int
+    restore_value: no
+    initial_value: '0'
+
 interval:
   - interval: 2s
     then:
       - lambda: 'id(blink_counter) = 0;'
+
+# ─── Script: Auto-navigate filter interval to a target ───────────────────────
+# Uses a single Längre probe-press to discover current state if unknown,
+# then presses Kortare/Längre until target is reached, then confirms with
+# a 5-second Tidur hold (Filter Reset).
+
+script:
+  - id: set_filter_interval_script
+    mode: single
+    then:
+      # Step 1: If current state is unknown, probe with one Längre press
+      # and read which temp lamp lights up to discover current state.
+      - if:
+          condition:
+            lambda: 'return id(filter_intervall_manader) == 0;'
+          then:
+            - output.turn_on: out_tidur
+            - delay: 1s
+            - output.turn_on: out_temp_up
+            - delay: 300ms
+            - output.turn_off: out_temp_up
+            - output.turn_off: out_tidur
+            - delay: 400ms
+            - lambda: |-
+                if      (id(temp_lamp6).state) id(filter_intervall_manader) = 12;
+                else if (id(temp_lamp7).state) id(filter_intervall_manader) = 9;
+                else if (id(temp_lamp8).state) id(filter_intervall_manader) = 6;
+            - delay: 1200ms
+
+      # Step 2: Calculate how many steps are needed (positive = Längre, negative = Kortare)
+      - lambda: |-
+          int cur = id(filter_intervall_manader);
+          int tgt = id(filter_target_manader);
+          if (cur == 0 || tgt == 0) {
+            id(nav_steps) = 0;
+          } else {
+            int ci = (cur == 6) ? 0 : (cur == 9) ? 1 : 2;
+            int ti = (tgt == 6) ? 0 : (tgt == 9) ? 1 : 2;
+            id(nav_steps) = ti - ci;
+          }
+
+      # Step 3: Press Längre for each positive step
+      - while:
+          condition:
+            lambda: 'return id(nav_steps) > 0;'
+          then:
+            - output.turn_on: out_tidur
+            - delay: 1s
+            - output.turn_on: out_temp_up
+            - delay: 300ms
+            - output.turn_off: out_temp_up
+            - output.turn_off: out_tidur
+            - lambda: 'id(nav_steps)--;'
+            - delay: 1500ms
+
+      # Step 4: Press Kortare for each negative step
+      - while:
+          condition:
+            lambda: 'return id(nav_steps) < 0;'
+          then:
+            - output.turn_on: out_tidur
+            - delay: 1s
+            - output.turn_on: out_temp_down
+            - delay: 300ms
+            - output.turn_off: out_temp_down
+            - output.turn_off: out_tidur
+            - lambda: 'id(nav_steps)++;'
+            - delay: 1500ms
+
+      # Step 5: Confirm with 5-second Tidur (Filter Reset) — updates filter_confirmed
+      # and filter_intervall_manader via the filter_reset_trigger binary sensor.
+      - output.turn_on: out_tidur
+      - delay: 5s
+      - output.turn_off: out_tidur
+      - lambda: 'id(filter_target_manader) = 0;'
 
 # ─── Switches: Button Simulation (300ms pulse via optocoupler) ───────────────
 # Uses switch + auto-off so HA can call switch.turn_on directly
@@ -193,6 +278,30 @@ button:
       - delay: 300ms
       - output.turn_off: out_temp_down
       - output.turn_off: out_tidur
+
+  - platform: template
+    name: "Filter 6 Man"
+    object_id: filter_6_man
+    icon: "mdi:calendar-range"
+    on_press:
+      - lambda: 'id(filter_target_manader) = 6;'
+      - script.execute: set_filter_interval_script
+
+  - platform: template
+    name: "Filter 9 Man"
+    object_id: filter_9_man
+    icon: "mdi:calendar-range"
+    on_press:
+      - lambda: 'id(filter_target_manader) = 9;'
+      - script.execute: set_filter_interval_script
+
+  - platform: template
+    name: "Filter 12 Man"
+    object_id: filter_12_man
+    icon: "mdi:calendar-range"
+    on_press:
+      - lambda: 'id(filter_target_manader) = 12;'
+      - script.execute: set_filter_interval_script
 
 # ─── Binary Sensors: LED Reading (pullup + inverted) ─────────────────────────
 

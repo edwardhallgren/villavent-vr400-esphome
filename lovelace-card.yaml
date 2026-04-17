@@ -327,23 +327,35 @@ cards:
   - type: custom:mushroom-chips-card
     chips:
       - type: template
-        icon: mdi:calendar-minus
-        content: Kortare
-        icon_color: blue
+        icon: mdi:calendar-range
+        content: "6 mån"
+        icon_color: >-
+          {{ 'green' if states('sensor.vr_filter_intervall_sparat') == '6 mån' else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: button.press
           target:
-            entity_id: button.vr_filter_intervall_kortare
+            entity_id: button.vr_filter_6_man
       - type: template
-        icon: mdi:calendar-plus
-        content: Längre
-        icon_color: orange
+        icon: mdi:calendar-range
+        content: "9 mån"
+        icon_color: >-
+          {{ 'orange' if states('sensor.vr_filter_intervall_sparat') == '9 mån' else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: button.press
           target:
-            entity_id: button.vr_filter_intervall_langre
+            entity_id: button.vr_filter_9_man
+      - type: template
+        icon: mdi:calendar-range
+        content: "12 mån"
+        icon_color: >-
+          {{ 'blue' if states('sensor.vr_filter_intervall_sparat') == '12 mån' else 'grey' }}
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.vr_filter_12_man
     alignment: center
   - type: markdown
     content: |
