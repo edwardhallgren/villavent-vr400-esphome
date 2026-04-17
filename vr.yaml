@@ -26,6 +26,13 @@ wifi:
 
 captive_portal:
 
+# ─── Output for long-press operations ───────────────────────────────────────
+
+output:
+  - platform: gpio
+    pin: GPIO3
+    id: out_tidur
+
 globals:
   - id: blink_counter
     type: int
@@ -102,6 +109,14 @@ button:
     on_press:
       - switch.turn_on: sw_fan_down
       - switch.turn_on: sw_tidur
+
+  - platform: template
+    name: "Filter Reset"
+    icon: "mdi:air-filter"
+    on_press:
+      - output.turn_on: out_tidur
+      - delay: 5s
+      - output.turn_off: out_tidur
 
 # ─── Binary Sensors: LED Reading (pullup + inverted) ─────────────────────────
 
@@ -202,6 +217,8 @@ binary_sensor:
         pullup: true
       inverted: true
     name: "Filter Byte"
+    on_state:
+      - lambda: 'id(blink_counter) += 1;'
 
 # ─── Sensors: Derived State ───────────────────────────────────────────────────
 
@@ -239,3 +256,21 @@ binary_sensor:
     icon: "mdi:led-on"
     lambda: |-
       return id(blink_counter) >= 6;
+
+  - platform: template
+    name: "Filter Reset Bekräftad"
+    icon: "mdi:air-filter"
+    lambda: |-
+      return id(blink_counter) >= 4 && id(fan_max).state == false
+             && id(fan_normal).state == false && id(fan_min).state == false;
+
+text_sensor:
+  - platform: template
+    name: "Filter Intervall"
+    update_interval: 2s
+    icon: "mdi:calendar-clock"
+    lambda: |-
+      if (id(temp_lamp6).state) return {"Låg temp (lamp 6)"};
+      if (id(temp_lamp7).state) return {"Medel temp (lamp 7)"};
+      if (id(temp_lamp8).state) return {"Hög temp (lamp 8)"};
+      return {"Okänt"};
