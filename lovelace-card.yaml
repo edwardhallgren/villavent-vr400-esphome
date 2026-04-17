@@ -57,6 +57,13 @@ cards:
           action: more-info
           entity: binary_sensor.vr_filter_byte
     alignment: center
+    card_mod:
+      style: |
+        ha-card {
+          --mush-chip-height: 44px;
+          --mush-chip-icon-size: 22px;
+          --mush-chip-font-size: 14px;
+        }
 
   # ─── Fläkthastighet ────────────────────────────────────────────────────────
   - type: custom:mushroom-chips-card
@@ -86,6 +93,13 @@ cards:
           action: perform-action
           perform_action: script.set_fan_to_max_2
     alignment: center
+    card_mod:
+      style: |
+        ha-card {
+          --mush-chip-height: 44px;
+          --mush-chip-icon-size: 22px;
+          --mush-chip-font-size: 14px;
+        }
 
   - type: custom:mushroom-chips-card
     chips:
@@ -138,6 +152,13 @@ cards:
           action: perform-action
           perform_action: script.set_temp_to_5
     alignment: center
+    card_mod:
+      style: |
+        ha-card {
+          --mush-chip-height: 44px;
+          --mush-chip-icon-size: 22px;
+          --mush-chip-font-size: 14px;
+        }
   # ─── Boost ─────────────────────────────────────────────────────────────────
   - type: conditional
     conditions:
@@ -208,6 +229,13 @@ cards:
           target:
             entity_id: button.vr_filter_reset
     alignment: center
+    card_mod:
+      style: |
+        ha-card {
+          --mush-chip-height: 44px;
+          --mush-chip-icon-size: 22px;
+          --mush-chip-font-size: 14px;
+        }
 
   # Filter interval preset
   - type: custom:mushroom-chips-card
@@ -243,6 +271,13 @@ cards:
           target:
             entity_id: button.vr_filter_12_man
     alignment: center
+    card_mod:
+      style: |
+        ha-card {
+          --mush-chip-height: 44px;
+          --mush-chip-icon-size: 22px;
+          --mush-chip-font-size: 14px;
+        }
 
   # Normalflöde
   - type: custom:mushroom-chips-card
@@ -268,3 +303,10 @@ cards:
           target:
             entity_id: button.vr_normal_hastighet_hog
     alignment: center
+    card_mod:
+      style: |
+        ha-card {
+          --mush-chip-height: 44px;
+          --mush-chip-icon-size: 22px;
+          --mush-chip-font-size: 14px;
+        }
