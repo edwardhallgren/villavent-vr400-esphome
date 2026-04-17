@@ -11,21 +11,10 @@
 ##   like binary_sensor.vr_flakt_lage_max). If your device has a different name,
 ##   do a find-and-replace on the "vr_" prefix below.
 ##
-## Additional HA helpers required (create in Settings > Automations > Scripts/Timers):
-##
-##   Scripts:
-##     script.set_fan_to_min
-##     script.set_fan_to_normal
-##     script.set_fan_to_max_2
-##     script.set_temp_to_0  through  script.set_temp_to_5
-##     script.villavent_boost_20min
-##
-##   Timer:
-##     timer.villavent_boost_timer   (duration: 00:20:00)
-##
-## Each set_fan_to_* and set_temp_to_* script should press the UP or DOWN button
-## the correct number of times to reach the target level from any starting state,
-## or use a loop that reads the current sensor and presses until target is reached.
+## Additional HA helpers required (create in Settings > Automations & Scripts/Timers):
+##   Scripts: set_fan_to_min, set_fan_to_normal, set_fan_to_max_2,
+##            set_temp_to_0…5, villavent_boost_20min
+##   Timer:   villavent_boost_timer (duration: 00:20:00)
 
 type: vertical-stack
 cards:
@@ -41,42 +30,42 @@ cards:
           padding: 8px;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+
+  # ─── Status ────────────────────────────────────────────────────────────────
   - type: custom:mushroom-chips-card
     chips:
       - type: template
         icon: mdi:sun-thermometer
         content: Sommar
         icon_color: >-
-          {{ 'amber' if is_state('binary_sensor.vr_sommardrift', 'on') else
-          'grey' }}
+          {{ 'amber' if is_state('binary_sensor.vr_sommardrift', 'on') else 'grey' }}
         tap_action:
           action: none
       - type: template
         icon: mdi:lightning-bolt
         content: Elpatron
         icon_color: >-
-          {{ 'orange' if is_state('binary_sensor.vr_elpatron_aktiv', 'on') else
-          'grey' }}
+          {{ 'orange' if is_state('binary_sensor.vr_elpatron_aktiv', 'on') else 'grey' }}
         tap_action:
           action: none
       - type: template
         icon: mdi:air-filter
         content: Filter
         icon_color: >-
-          {{ 'red' if is_state('binary_sensor.vr_filter_byte', 'on') else
-          'grey' }}
+          {{ 'red' if is_state('binary_sensor.vr_filter_byte', 'on') else 'grey' }}
         tap_action:
           action: more-info
           entity: binary_sensor.vr_filter_byte
     alignment: center
+
+  # ─── Fläkthastighet ────────────────────────────────────────────────────────
   - type: custom:mushroom-chips-card
     chips:
       - type: template
         icon: mdi:fan-speed-1
         content: Min
         icon_color: >-
-          {{ 'green' if is_state('binary_sensor.vr_flakt_lage_min', 'on') else
-          'grey' }}
+          {{ 'green' if is_state('binary_sensor.vr_flakt_lage_min', 'on') else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: script.set_fan_to_min
@@ -84,8 +73,7 @@ cards:
         icon: mdi:fan-speed-2
         content: Norm
         icon_color: >-
-          {{ 'orange' if is_state('binary_sensor.vr_flakt_lage_normal', 'on')
-          else 'grey' }}
+          {{ 'orange' if is_state('binary_sensor.vr_flakt_lage_normal', 'on') else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: script.set_fan_to_normal
@@ -93,12 +81,13 @@ cards:
         icon: mdi:fan-speed-3
         content: Max
         icon_color: >-
-          {{ 'red' if is_state('binary_sensor.vr_flakt_lage_max', 'on') else
-          'grey' }}
+          {{ 'red' if is_state('binary_sensor.vr_flakt_lage_max', 'on') else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: script.set_fan_to_max_2
     alignment: center
+
+  # ─── Boost ─────────────────────────────────────────────────────────────────
   - type: conditional
     conditions:
       - condition: state
@@ -121,9 +110,7 @@ cards:
             background: rgba(156, 39, 176, 0.1);
             transition: all 0.3s ease;
           }
-          ha-card:active {
-            transform: scale(0.97);
-          }
+          ha-card:active { transform: scale(0.97); }
   - type: conditional
     conditions:
       - condition: state
@@ -150,24 +137,21 @@ cards:
             border: 2px solid #F44336;
             background: rgba(244, 67, 54, 0.1);
           }
+
+  # ─── Temperaturkontroll ────────────────────────────────────────────────────
   - type: markdown
     content: |
       ### 🌡️ Temperaturkontroll
     card_mod:
       style: |
-        ha-card {
-          background: rgba(255,255,255,0.05);
-          text-align: center;
-          padding: 4px;
-        }
+        ha-card { background: rgba(255,255,255,0.05); text-align: center; padding: 4px; }
   - type: custom:mushroom-chips-card
     chips:
       - type: template
         icon: mdi:snowflake
         content: "0"
         icon_color: >-
-          {{ 'light-blue' if is_state('sensor.vr_temp_aktuellt_lage', '0') else
-          'grey' }}
+          {{ 'light-blue' if is_state('sensor.vr_temp_aktuellt_lage', '0') else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: script.set_temp_to_0
@@ -175,8 +159,7 @@ cards:
         icon: mdi:numeric-1-circle
         content: ""
         icon_color: >-
-          {{ 'blue' if is_state('sensor.vr_temp_aktuellt_lage', '1') else 'grey'
-          }}
+          {{ 'blue' if is_state('sensor.vr_temp_aktuellt_lage', '1') else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: script.set_temp_to_1
@@ -184,8 +167,7 @@ cards:
         icon: mdi:numeric-2-circle
         content: ""
         icon_color: >-
-          {{ 'cyan' if is_state('sensor.vr_temp_aktuellt_lage', '2') else 'grey'
-          }}
+          {{ 'cyan' if is_state('sensor.vr_temp_aktuellt_lage', '2') else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: script.set_temp_to_2
@@ -193,8 +175,7 @@ cards:
         icon: mdi:numeric-3-circle
         content: ""
         icon_color: >-
-          {{ 'green' if is_state('sensor.vr_temp_aktuellt_lage', '3') else
-          'grey' }}
+          {{ 'green' if is_state('sensor.vr_temp_aktuellt_lage', '3') else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: script.set_temp_to_3
@@ -202,8 +183,7 @@ cards:
         icon: mdi:numeric-4-circle
         content: ""
         icon_color: >-
-          {{ 'orange' if is_state('sensor.vr_temp_aktuellt_lage', '4') else
-          'grey' }}
+          {{ 'orange' if is_state('sensor.vr_temp_aktuellt_lage', '4') else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: script.set_temp_to_4
@@ -211,31 +191,55 @@ cards:
         icon: mdi:numeric-5-circle
         content: ""
         icon_color: >-
-          {{ 'red' if is_state('sensor.vr_temp_aktuellt_lage', '5') else 'grey'
-          }}
+          {{ 'red' if is_state('sensor.vr_temp_aktuellt_lage', '5') else 'grey' }}
         tap_action:
           action: perform-action
           perform_action: script.set_temp_to_5
     alignment: center
-  - type: markdown
-    content: |
-      ### 🔧 Admin — Filterbyte
-    card_mod:
-      style: |
-        ha-card {
-          background: rgba(255,255,255,0.05);
-          text-align: center;
-          padding: 4px;
-        }
+  # Compact description chip for current temperature level
   - type: custom:mushroom-chips-card
     chips:
       - type: template
-        icon: mdi:led-on
-        content: Filter bekräftad
+        icon: mdi:thermometer
+        content: >-
+          {% set t = states('sensor.vr_temp_aktuellt_lage') %}
+          {% if t == '0' %}0 — Sommardrift
+          {% elif t == '1' %}1 — Kallast
+          {% elif t == '2' %}2 — Kallt
+          {% elif t == '3' %}3 — Normal
+          {% elif t == '4' %}4 — Varmt
+          {% elif t == '5' %}5 — Varmast
+          {% else %}Okänt{% endif %}
         icon_color: >-
-          {{ 'green' if is_state('binary_sensor.vr_filter_reset_bekraftad', 'on') else 'grey' }}
+          {% set t = states('sensor.vr_temp_aktuellt_lage') %}
+          {% if t == '0' %}light-blue{% elif t == '1' %}blue{% elif t == '2' %}cyan
+          {% elif t == '3' %}green{% elif t == '4' %}orange{% elif t == '5' %}red
+          {% else %}grey{% endif %}
         tap_action:
           action: none
+    alignment: center
+
+  # ─── Admin ─────────────────────────────────────────────────────────────────
+  - type: markdown
+    content: |
+      ### ⚙️ Admin
+    card_mod:
+      style: |
+        ha-card { background: rgba(255,255,255,0.05); text-align: center; padding: 4px; }
+
+  # Filter: Reset knapp + bekräftelse + sparat intervall
+  - type: custom:mushroom-chips-card
+    chips:
+      - type: template
+        icon: mdi:air-filter
+        content: Filter Reset
+        icon_color: >-
+          {{ 'green' if is_state('binary_sensor.vr_filter_reset_bekraftad', 'on') else 'orange' }}
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.vr_filter_reset
       - type: template
         icon: mdi:calendar-clock
         content: "{{ states('sensor.vr_filter_intervall_sparat') }}"
@@ -243,27 +247,8 @@ cards:
         tap_action:
           action: none
     alignment: center
-  - type: custom:mushroom-template-card
-    primary: Filter Reset
-    secondary: Håll Tidur 5 sek
-    icon: mdi:air-filter
-    icon_color: orange
-    layout: horizontal
-    tap_action:
-      action: perform-action
-      perform_action: button.press
-      target:
-        entity_id: button.vr_filter_reset
-    card_mod:
-      style: |
-        ha-card {
-          border: 2px solid #FF9800;
-          background: rgba(255, 152, 0, 0.1);
-          transition: all 0.3s ease;
-        }
-        ha-card:active {
-          transform: scale(0.97);
-        }
+
+  # Filter interval preset
   - type: custom:mushroom-chips-card
     chips:
       - type: template
@@ -297,32 +282,15 @@ cards:
           target:
             entity_id: button.vr_filter_12_man
     alignment: center
-  - type: markdown
-    content: |
-      ### ⚙️ Admin — Normalflöde
-    card_mod:
-      style: |
-        ha-card {
-          background: rgba(255,255,255,0.05);
-          text-align: center;
-          padding: 4px;
-        }
-  - type: custom:mushroom-chips-card
-    chips:
-      - type: template
-        icon: mdi:led-on
-        content: Bekräftad
-        icon_color: >-
-          {{ 'green' if is_state('binary_sensor.vr_installning_bekraftad', 'on') else 'grey' }}
-        tap_action:
-          action: none
-    alignment: center
+
+  # Normalflöde
   - type: custom:mushroom-chips-card
     chips:
       - type: template
         icon: mdi:fan-speed-1
         content: Norm Låg
-        icon_color: blue
+        icon_color: >-
+          {{ 'green' if is_state('binary_sensor.vr_installning_bekraftad', 'on') else 'blue' }}
         tap_action:
           action: perform-action
           perform_action: button.press
@@ -331,7 +299,8 @@ cards:
       - type: template
         icon: mdi:fan-speed-3
         content: Norm Hög
-        icon_color: orange
+        icon_color: >-
+          {{ 'green' if is_state('binary_sensor.vr_installning_bekraftad', 'on') else 'orange' }}
         tap_action:
           action: perform-action
           perform_action: button.press
