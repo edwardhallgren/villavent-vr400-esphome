@@ -6,18 +6,28 @@
 
 Control your Villavent VR 400/E3 ventilation unit using an ESP32 and ESPHome, integrated with Home Assistant. Instead of modifying the original electronics, this project uses **optocouplers** to simulate button presses and read LED status indicators — keeping the original control board fully intact.
 
+## Background
+
+This project started when the original wall panel stopped responding entirely. The culprit was the FFC (flat flexible cable) connector: it had worked loose from the panel PCB. The back of the board (below) shows the connector at the bottom edge and the traces running up to each button and LED.
+
+<p align="center">
+  <img src="images/ce_panel.jpg" alt="Back of the Villavent control panel PCB showing the FFC connector" width="220">
+</p>
+
+Rather than waiting for a replacement part, I re-soldered directly to the FFC connector pads on the back of the PCB. With the cable firmly re-attached and the panel working again, it was a natural step to add ESP32-based smart control at the same time — tapping into the same signals with optocouplers to keep the original board completely unmodified.
+
 ## How It Works
 
-The Villavent VR 400/E3 has a physical wall-mounted control panel (pictured above) with:
+The Villavent VR 400/E3 has a physical wall-mounted control panel with:
 - **Fan speed buttons** (▲/▼) and indicator LEDs for Max / Norm / Min
-- **Temperature buttons** (▲/▼) and a 5-dot LED bar showing the current setpoint (levels 0–5)
+- **Temperature buttons** (▲/▼) and a 3-LED bar showing the current setpoint (levels 0–5)
 - A **Summer mode** indicator and a **Filter change** alert LED
 
-This project taps into those signals using optocouplers in two ways, without touching the original electronics:
+This project taps into those signals using optocouplers in two ways:
 
 **Outputs (simulating button presses):** An optocoupler is connected in parallel with each button. When the ESP32 briefly pulls the GPIO high (300 ms pulse), the optocoupler closes the circuit — identical to a physical button press.
 
-**Inputs (reading LED state):** An optocoupler is connected across each status LED. When the LED lights up, it drives the optocoupler which pulls the ESP32 GPIO low (inputs are configured with pullup + inverted).
+**Inputs (reading LED state):** An optocoupler is connected across each status LED. When the LED lights up, it drives the optocoupler which pulls the ESP32 GPIO low (inputs are configured with pull-up + inverted).
 
 This approach means zero direct electrical connection between the ESP32 and the ventilation unit's PCB.
 
@@ -25,9 +35,39 @@ This approach means zero direct electrical connection between the ESP32 and the 
 
 - Fan speed control (UP / DOWN) with current state feedback (MIN / NORMAL / MAX)
 - Temperature setpoint control (UP / DOWN) with current state feedback (levels 0–5)
+- Filter interval presets (6 / 9 / 12 months) — auto-navigates to the target and confirms
+- 20-minute boost mode at MAX fan with live countdown, cancellable from dashboard
 - Optional status sensors: Electric heater active, Summer mode, Filter change alert
 - Full Home Assistant integration via ESPHome API
 - OTA firmware updates
+
+## Wiring Schematic
+
+Two different optocoupler circuits are used. A PC817 (or equivalent 4N35) works for both.
+
+### Output — Button Simulation (×5) — 220 Ω
+
+```
+                      ┌─────────────────────┐
+ESP32 GPIO ─[220Ω]──▶ 1 (A)             3 (C) ──── FFC button signal pin
+                      │      PC817          │
+ESP32 GND  ─────────▶ 2 (K)             4 (E) ──── FFC GND (pin 5)
+                      └─────────────────────┘
+```
+
+When the ESP32 GPIO goes HIGH, current flows through the 220 Ω resistor and the optocoupler's LED, switching the transistor on and closing the circuit across the button contacts.
+
+### Input — LED Reading (×9) — 1.2 kΩ
+
+```
+                         ┌─────────────────────┐
+FFC VCC (16) ─[1.2kΩ]──▶ 1 (A)             3 (C) ──── ESP32 GPIO (input, pull-up)
+                         │      PC817          │
+FFC LED signal ─────────▶ 2 (K)             4 (E) ──── ESP32 GND
+                         └─────────────────────┘
+```
+
+When the panel LED is on, current flows from FFC VCC through the 1.2 kΩ resistor and the optocoupler's LED, switching the transistor on and pulling the ESP32 GPIO low. The GPIO is configured as `input: pullup, inverted: true`, so it reads `true` (on) when the LED is lit.
 
 ## FFC Connector Pinout
 
@@ -38,7 +78,7 @@ The control panel connects to the main unit via a 16-pin FFC (flat flexible cabl
 | 1       | Fan DOWN            | Button |                              |
 | 2       | Temp UP             | Button |                              |
 | 3       | Temp DOWN           | Button |                              |
-| 4       | Timer (tidur)       | Button | Not used in this project     |
+| 4       | Timer (Tidur)       | Button | Used for filter interval & reset |
 | 5       | Common (GND)        | Button | Shared return for all buttons |
 | 6       | Fan UP              | Button |                              |
 | 7       | Fan LED — MAX       | LED    |                              |
@@ -53,32 +93,33 @@ The control panel connects to the main unit via a 16-pin FFC (flat flexible cabl
 | 16      | VCC for LEDs        | Power  | LED supply voltage           |
 
 For **button outputs**: connect the optocoupler output (collector/emitter) between the FFC pin and pin 5 (common).  
-For **LED inputs**: connect the optocoupler LED side between the FFC signal pin and pin 16 (VCC), with a current-limiting resistor in series.
+For **LED inputs**: connect the optocoupler LED side between FFC pin 16 (VCC) and the FFC signal pin, with a current-limiting resistor in series from VCC.
 
 ## Pin Mapping
 
 ### Outputs — Button Simulation (ESP32-S3 → FFC)
 
-| Function  | GPIO  | FFC Pin |
-|-----------|-------|---------|
-| Fan UP    | 11    | 6       |
-| Fan DOWN  | 10    | 1       |
-| Temp UP   | 16    | 2       |
-| Temp DOWN | 4     | 3       |
+| Function  | GPIO | FFC Pin |
+|-----------|------|---------|
+| Fan UP    | 2    | 6       |
+| Fan DOWN  | 1    | 1       |
+| Temp UP   | 6    | 2       |
+| Temp DOWN | 5    | 3       |
+| Tidur     | 3    | 4       |
 
 ### Inputs — LED Reading (FFC → ESP32-S3)
 
 | Function              | GPIO | FFC Pin | Notes                               |
 |-----------------------|------|---------|-------------------------------------|
-| Fan speed MAX         | 40   | 7       | Pullup, inverted                    |
-| Fan speed NORMAL      | 41   | 8       | Pullup, inverted                    |
-| Fan speed MIN         | 42   | 9       | Pullup, inverted                    |
-| Temp lamp 6 (level 1) | 38   | 14      | Pullup, inverted                    |
-| Temp lamp 7 (level 2) | 39   | 13      | Pullup, inverted                    |
-| Temp lamp 8 (level 3) | 15   | 12      | Pullup, inverted                    |
-| Electric heater       | 13   | 10      | Optional — comment out if not wired |
+| Fan speed MAX         | 42   | 7       | Pull-up, inverted                   |
+| Fan speed NORMAL      | 41   | 8       | Pull-up, inverted                   |
+| Fan speed MIN         | 40   | 9       | Pull-up, inverted                   |
+| Temp lamp 6 (level 1) | 35   | 14      | Pull-up, inverted, internal         |
+| Temp lamp 7 (level 2) | 34   | 13      | Pull-up, inverted, internal         |
+| Temp lamp 8 (level 3) | 21   | 12      | Pull-up, inverted, internal         |
+| Electric heater       | 46   | 10      | Optional — comment out if not wired |
 | Summer mode           | 14   | 11      | Optional — comment out if not wired |
-| Filter change         | 12   | 15      | Optional — comment out if not wired |
+| Filter change         | 18   | 15      | Optional — comment out if not wired |
 
 ## Temperature Level Decoding
 
@@ -100,8 +141,10 @@ This decoding runs as a template sensor in ESPHome, updating every second.
 ### Prerequisites
 
 - [ESPHome](https://esphome.io) installed (via Home Assistant add-on or CLI)
-- ESP32 development board (e.g. ESP32-WROOM)
-- Optocouplers (e.g. PC817 or similar 4N35)
+- ESP32-S3 development board (e.g. ESP32-S3-DevKitC-1)
+- Optocouplers (e.g. PC817 or 4N35)
+- 220 Ω resistors (one per button output)
+- 1.2 kΩ resistors (one per LED input)
 - Home Assistant instance
 
 ### Installation
@@ -121,12 +164,12 @@ This decoding runs as a template sensor in ESPHome, updating every second.
    fallback_password: "choose a password"
    ```
 
-4. Flash the ESP32:
+3. Flash the ESP32:
    ```bash
    esphome run vr.yaml
    ```
 
-5. Add the device to Home Assistant via Settings > Integrations > ESPHome.
+4. Add the device to Home Assistant via Settings > Integrations > ESPHome.
 
 ### Optional Sensors
 
@@ -136,22 +179,28 @@ Three additional binary sensors (Electric heater, Summer mode, Filter change) ar
 # Comment these out if not yet connected:
   - platform: gpio
     pin:
-      number: GPIO13
+      number: GPIO46
     name: "Elpatron Aktiv"
     ...
 ```
 
 ## Home Assistant Dashboard
 
-A ready-made Lovelace card is included in [`lovelace-card.yaml`](lovelace-card.yaml). It provides:
+A ready-made Lovelace card is included in [`lovelace-card.yaml`](lovelace-card.yaml).
+
+<p align="center">
+  <img src="images/lovelace.png" alt="Home Assistant Lovelace dashboard for Villavent" width="400">
+</p>
+
+The card provides:
 
 - Status chips for Summer mode, Electric heater, and Filter alert
-- One-tap fan speed presets (Min / Normal / Max) with active-state highlighting
-- Current fan speed display
-- Step-by-step fan and temperature nudge buttons
-- Boost mode (20 min at MAX) with a live countdown bar that cancels on tap
-
-![Dashboard preview showing fan speed control, boost button, and temperature level selector](https://raw.githubusercontent.com/edwardhallgren/villavent-vr400-esphome/main/lovelace-card.yaml)
+- Fan speed presets (Min / Normal / Max) with active-state highlighting
+- Temperature setpoint selector (levels 0–5) with active-state highlighting
+- **Boost mode** — 20 min at MAX fan with a live countdown; tap to cancel
+- Filter Reset (hold to activate, prevents accidental trigger)
+- Filter interval presets (6 / 9 / 12 months) — auto-navigates to the target
+- Normal speed presets (Low / High) for adjusting the base fan level
 
 ### Required HACS Frontend Integrations
 
@@ -161,7 +210,6 @@ Install these via HACS → Frontend before adding the card:
 |---|---|
 | Mushroom | `piitaya/lovelace-mushroom` |
 | card-mod | `thomasloven/lovelace-card-mod` |
-| timer-bar-card | `rianadon/timer-bar-card` |
 
 ### Entity Naming
 
@@ -174,27 +222,18 @@ esphome:
 
 If you use a different device name, do a find-and-replace on the `vr_` prefix in `lovelace-card.yaml`.
 
-### Additional HA Helpers Required
+### HA Scripts Required
 
-The card calls scripts and a timer that you need to create manually in Home Assistant (Settings → Automations & Scenes):
-
-**Timer**
-
-| Entity | Duration |
-|---|---|
-| `timer.villavent_boost_timer` | 20 minutes |
-
-**Scripts**
+The fan speed and temperature chips call HA scripts to drive the buttons until the target state is reached. Create these in Settings → Automations & Scenes:
 
 | Entity | Purpose |
 |---|---|
 | `script.set_fan_to_min` | Press Fan DOWN until MIN LED is on |
 | `script.set_fan_to_normal` | Press until NORMAL LED is on |
 | `script.set_fan_to_max_2` | Press Fan UP until MAX LED is on |
-| `script.set_temp_to_0` … `script.set_temp_to_5` | Press Temp UP/DOWN until the target level sensor matches |
-| `script.villavent_boost_20min` | Set fan to MAX and start `timer.villavent_boost_timer` |
+| `script.set_temp_to_0` … `script.set_temp_to_5` | Press Temp UP/DOWN until target level matches |
 
-Each script reads the current sensor state and presses the UP or DOWN button the required number of times to reach the target level.
+Each script reads the current sensor state and presses the corresponding switch the required number of times.
 
 ### Adding the Card
 
@@ -204,9 +243,11 @@ Each script reads the current sensor state and presses the UP or DOWN button the
 
 ## Hardware Notes
 
-- Use a **current-limiting resistor** in series with each optocoupler LED side, sized for the LED voltage on the VR 400/E3 panel.
+- Use a **220 Ω current-limiting resistor** in series with each output optocoupler LED side (ESP32 GPIO → resistor → optocoupler anode).
+- Use a **1.2 kΩ current-limiting resistor** in series with each input optocoupler LED side (FFC VCC → resistor → optocoupler anode).
+- Size these resistors for the actual LED voltage on your panel if it differs.
 - The output optocouplers (button simulation) switch the collector/emitter across the original button contacts.
-- The input optocouplers (LED reading) have their LED side across the status LED, and the output side connected to the ESP32 GPIO and GND.
+- The input optocouplers (LED reading) have their LED side connected between FFC VCC (pin 16) and the status LED signal pin, and their transistor output connected to the ESP32 GPIO and GND.
 - The ESP32 and the ventilation unit share **no common ground** — the optocouplers provide full galvanic isolation.
 
 ## License
