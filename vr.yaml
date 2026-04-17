@@ -75,6 +75,16 @@ globals:
     restore_value: no
     initial_value: '0'
 
+  - id: boost_active
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+  - id: boost_start_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: '0'
+
 interval:
   - interval: 2s
     then:
@@ -155,6 +165,29 @@ script:
       - output.turn_off: out_tidur
       - lambda: 'id(filter_target_manader) = 0;'
 
+  # ─── Boost: 20 minutes at max fan, then return to normal ─────────────────
+  - id: boost_script
+    mode: single
+    then:
+      - lambda: |-
+          id(boost_active) = true;
+          id(boost_start_ms) = millis();
+      # Press fan up twice to reach MAX from any starting level
+      - output.turn_on: out_fan_up
+      - delay: 300ms
+      - output.turn_off: out_fan_up
+      - delay: 1500ms
+      - output.turn_on: out_fan_up
+      - delay: 300ms
+      - output.turn_off: out_fan_up
+      # Hold for 20 minutes
+      - delay: 20min
+      # Return to normal: one press down from MAX
+      - output.turn_on: out_fan_down
+      - delay: 300ms
+      - output.turn_off: out_fan_down
+      - lambda: 'id(boost_active) = false;'
+
 # ─── Switches: Button Simulation (300ms pulse via optocoupler) ───────────────
 # Uses switch + auto-off so HA can call switch.turn_on directly
 
@@ -227,6 +260,22 @@ switch:
 # ─── Admin: Normal Speed Setting ─────────────────────────────────────────────
 
 button:
+  - platform: template
+    name: "Boost Start"
+    icon: "mdi:turbine"
+    on_press:
+      - script.execute: boost_script
+
+  - platform: template
+    name: "Boost Stopp"
+    icon: "mdi:turbine"
+    on_press:
+      - script.stop: boost_script
+      - output.turn_on: out_fan_down
+      - delay: 300ms
+      - output.turn_off: out_fan_down
+      - lambda: 'id(boost_active) = false;'
+
   - platform: template
     name: "Normal Hastighet Hög"
     icon: "mdi:fan-speed-3"
@@ -438,7 +487,22 @@ binary_sensor:
     lambda: |-
       return id(filter_confirmed);
 
+  - platform: template
+    name: "Boost Aktiv"
+    lambda: 'return id(boost_active);'
+
 # ─── Sensors: Derived State ───────────────────────────────────────────────────
+
+sensor:
+  - platform: template
+    name: "Boost Kvar"
+    unit_of_measurement: "min"
+    update_interval: 15s
+    lambda: |-
+      if (!id(boost_active)) return {0.0f};
+      float elapsed_s = (float)(millis() - id(boost_start_ms)) / 1000.0f;
+      float remaining = 1200.0f - elapsed_s;
+      return {remaining < 0 ? 0.0f : remaining / 60.0f};
 
 text_sensor:
   - platform: template

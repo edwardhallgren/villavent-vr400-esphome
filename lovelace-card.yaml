@@ -87,57 +87,6 @@ cards:
           perform_action: script.set_fan_to_max_2
     alignment: center
 
-  # ─── Boost ─────────────────────────────────────────────────────────────────
-  - type: conditional
-    conditions:
-      - condition: state
-        entity: timer.villavent_boost_timer
-        state_not: active
-    card:
-      type: custom:mushroom-template-card
-      primary: Boost 20 min
-      secondary: Maximal ventilation
-      icon: mdi:turbine
-      icon_color: purple
-      layout: horizontal
-      tap_action:
-        action: perform-action
-        perform_action: script.villavent_boost_20min
-      card_mod:
-        style: |
-          ha-card {
-            border: 2px solid #9C27B0;
-            background: rgba(156, 39, 176, 0.1);
-            transition: all 0.3s ease;
-          }
-          ha-card:active { transform: scale(0.97); }
-  - type: conditional
-    conditions:
-      - condition: state
-        entity: timer.villavent_boost_timer
-        state: active
-    card:
-      type: custom:timer-bar-card
-      entity: timer.villavent_boost_timer
-      name: Boost pågår
-      icon: mdi:turbine
-      active_icon: mdi:turbine
-      bar_height: 8px
-      bar_foreground: "#F44336"
-      bar_background: rgba(244, 67, 54, 0.2)
-      text_width: 3em
-      tap_action:
-        action: perform-action
-        perform_action: timer.cancel
-        target:
-          entity_id: timer.villavent_boost_timer
-      card_mod:
-        style: |
-          ha-card {
-            border: 2px solid #F44336;
-            background: rgba(244, 67, 54, 0.1);
-          }
-
   - type: custom:mushroom-chips-card
     chips:
       - type: template
@@ -189,6 +138,59 @@ cards:
           action: perform-action
           perform_action: script.set_temp_to_5
     alignment: center
+  # ─── Boost ─────────────────────────────────────────────────────────────────
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: binary_sensor.vr_boost_aktiv
+        state: 'off'
+    card:
+      type: custom:mushroom-template-card
+      primary: Boost 20 min
+      secondary: Maximal ventilation
+      icon: mdi:turbine
+      icon_color: purple
+      layout: horizontal
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.vr_boost_start
+      card_mod:
+        style: |
+          ha-card {
+            border: 2px solid #9C27B0;
+            background: rgba(156, 39, 176, 0.1);
+            transition: all 0.3s ease;
+          }
+          ha-card:active { transform: scale(0.97); }
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: binary_sensor.vr_boost_aktiv
+        state: 'on'
+    card:
+      type: custom:mushroom-template-card
+      primary: >-
+        Boost pågår — {{ states('sensor.vr_boost_kvar') | int }} min kvar
+      secondary: Tryck för att avbryta
+      icon: mdi:turbine
+      icon_color: red
+      layout: horizontal
+      tap_action:
+        action: perform-action
+        perform_action: button.press
+        target:
+          entity_id: button.vr_boost_stopp
+      card_mod:
+        style: |
+          ha-card {
+            border: 2px solid #F44336;
+            background: rgba(244, 67, 54, 0.1);
+            transition: all 0.3s ease;
+          }
+          ha-card:active { transform: scale(0.97); }
+
   # ─── Admin ─────────────────────────────────────────────────────────────────
   - type: markdown
     content: |
