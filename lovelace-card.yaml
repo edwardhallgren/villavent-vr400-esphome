@@ -338,7 +338,7 @@ cards:
           action: none
       - type: template
         icon: mdi:calendar-clock
-        content: "{{ states('sensor.vr_filter_intervall') }}"
+        content: "{{ states('sensor.vr_filter_intervall_sparat') }}"
         icon_color: blue
         tap_action:
           action: none

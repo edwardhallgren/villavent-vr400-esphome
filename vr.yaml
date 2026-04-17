@@ -47,6 +47,11 @@ globals:
     restore_value: no
     initial_value: '0'
 
+  - id: filter_intervall_manader
+    type: int
+    restore_value: yes
+    initial_value: '0'
+
 interval:
   - interval: 2s
     then:
@@ -274,6 +279,16 @@ binary_sensor:
     lambda: |-
       return id(blink_counter) >= 4 && id(fan_max).state == false
              && id(fan_normal).state == false && id(fan_min).state == false;
+    on_state:
+      - if:
+          condition:
+            lambda: 'return x;'
+          then:
+            - delay: 500ms
+            - lambda: |-
+                if (id(temp_lamp6).state)      id(filter_intervall_manader) = 12;
+                else if (id(temp_lamp7).state) id(filter_intervall_manader) = 9;
+                else if (id(temp_lamp8).state) id(filter_intervall_manader) = 6;
 
 # ─── Sensors: Derived State ───────────────────────────────────────────────────
 
@@ -311,4 +326,15 @@ text_sensor:
       if (id(temp_lamp6).state) return {"12 mån"};
       if (id(temp_lamp7).state) return {"9 mån"};
       if (id(temp_lamp8).state) return {"6 mån"};
+      return {"Okänt"};
+
+  - platform: template
+    name: "Filter Intervall Sparat"
+    update_interval: 10s
+    icon: "mdi:calendar-clock"
+    lambda: |-
+      int m = id(filter_intervall_manader);
+      if (m == 12) return {"12 mån"};
+      if (m == 9)  return {"9 mån"};
+      if (m == 6)  return {"6 mån"};
       return {"Okänt"};
