@@ -74,32 +74,44 @@ switch:
       - delay: 300ms
       - switch.turn_off: sw_fan_down
 
-  - platform: gpio
-    pin: GPIO6
+  - platform: template
     id: sw_temp_up
     name: "Temp Upp"
+    optimistic: true
     restore_mode: ALWAYS_OFF
-    on_turn_on:
+    turn_on_action:
+      - output.turn_on: out_temp_up
       - delay: 300ms
-      - switch.turn_off: sw_temp_up
+      - output.turn_off: out_temp_up
+      - switch.template.publish:
+          id: sw_temp_up
+          state: false
 
-  - platform: gpio
-    pin: GPIO5
+  - platform: template
     id: sw_temp_down
     name: "Temp Ned"
+    optimistic: true
     restore_mode: ALWAYS_OFF
-    on_turn_on:
+    turn_on_action:
+      - output.turn_on: out_temp_down
       - delay: 300ms
-      - switch.turn_off: sw_temp_down
+      - output.turn_off: out_temp_down
+      - switch.template.publish:
+          id: sw_temp_down
+          state: false
 
-  - platform: gpio
-    pin: GPIO3
+  - platform: template
     id: sw_tidur
     name: "Tidur"
+    optimistic: true
     restore_mode: ALWAYS_OFF
-    on_turn_on:
+    turn_on_action:
+      - output.turn_on: out_tidur
       - delay: 300ms
-      - switch.turn_off: sw_tidur
+      - output.turn_off: out_tidur
+      - switch.template.publish:
+          id: sw_tidur
+          state: false
 
 # ─── Admin: Normal Speed Setting ─────────────────────────────────────────────
 
