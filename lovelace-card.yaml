@@ -58,12 +58,18 @@ cards:
           entity: binary_sensor.vr_filter_byte
     alignment: center
     card_mod:
-      style: |
-        ha-card {
-          --mush-chip-height: 44px;
-          --mush-chip-icon-size: 22px;
-          --mush-chip-font-size: 14px;
-        }
+      style:
+        mushroom-chip$: |
+          :host {
+            height: 44px !important;
+            font-size: 14px !important;
+            min-height: 44px !important;
+          }
+          ha-icon {
+            --mdc-icon-size: 22px !important;
+            width: 22px !important;
+            height: 22px !important;
+          }
 
   # ─── Fläkthastighet ────────────────────────────────────────────────────────
   - type: custom:mushroom-chips-card
@@ -94,12 +100,18 @@ cards:
           perform_action: script.set_fan_to_max_2
     alignment: center
     card_mod:
-      style: |
-        ha-card {
-          --mush-chip-height: 44px;
-          --mush-chip-icon-size: 22px;
-          --mush-chip-font-size: 14px;
-        }
+      style:
+        mushroom-chip$: |
+          :host {
+            height: 44px !important;
+            font-size: 14px !important;
+            min-height: 44px !important;
+          }
+          ha-icon {
+            --mdc-icon-size: 22px !important;
+            width: 22px !important;
+            height: 22px !important;
+          }
 
   - type: custom:mushroom-chips-card
     chips:
@@ -153,12 +165,18 @@ cards:
           perform_action: script.set_temp_to_5
     alignment: center
     card_mod:
-      style: |
-        ha-card {
-          --mush-chip-height: 44px;
-          --mush-chip-icon-size: 22px;
-          --mush-chip-font-size: 14px;
-        }
+      style:
+        mushroom-chip$: |
+          :host {
+            height: 44px !important;
+            font-size: 14px !important;
+            min-height: 44px !important;
+          }
+          ha-icon {
+            --mdc-icon-size: 22px !important;
+            width: 22px !important;
+            height: 22px !important;
+          }
   # ─── Boost ─────────────────────────────────────────────────────────────────
   - type: conditional
     conditions:
@@ -230,12 +248,18 @@ cards:
             entity_id: button.vr_filter_reset
     alignment: center
     card_mod:
-      style: |
-        ha-card {
-          --mush-chip-height: 44px;
-          --mush-chip-icon-size: 22px;
-          --mush-chip-font-size: 14px;
-        }
+      style:
+        mushroom-chip$: |
+          :host {
+            height: 44px !important;
+            font-size: 14px !important;
+            min-height: 44px !important;
+          }
+          ha-icon {
+            --mdc-icon-size: 22px !important;
+            width: 22px !important;
+            height: 22px !important;
+          }
 
   # Filter interval preset
   - type: custom:mushroom-chips-card
@@ -272,12 +296,18 @@ cards:
             entity_id: button.vr_filter_12_man
     alignment: center
     card_mod:
-      style: |
-        ha-card {
-          --mush-chip-height: 44px;
-          --mush-chip-icon-size: 22px;
-          --mush-chip-font-size: 14px;
-        }
+      style:
+        mushroom-chip$: |
+          :host {
+            height: 44px !important;
+            font-size: 14px !important;
+            min-height: 44px !important;
+          }
+          ha-icon {
+            --mdc-icon-size: 22px !important;
+            width: 22px !important;
+            height: 22px !important;
+          }
 
   # Normalflöde
   - type: custom:mushroom-chips-card
@@ -304,9 +334,15 @@ cards:
             entity_id: button.vr_normal_hastighet_hog
     alignment: center
     card_mod:
-      style: |
-        ha-card {
-          --mush-chip-height: 44px;
-          --mush-chip-icon-size: 22px;
-          --mush-chip-font-size: 14px;
-        }
+      style:
+        mushroom-chip$: |
+          :host {
+            height: 44px !important;
+            font-size: 14px !important;
+            min-height: 44px !important;
+          }
+          ha-icon {
+            --mdc-icon-size: 22px !important;
+            width: 22px !important;
+            height: 22px !important;
+          }
