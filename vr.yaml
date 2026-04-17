@@ -33,6 +33,14 @@ output:
     pin: GPIO3
     id: out_tidur
 
+  - platform: gpio
+    pin: GPIO6
+    id: out_temp_up
+
+  - platform: gpio
+    pin: GPIO5
+    id: out_temp_down
+
 globals:
   - id: blink_counter
     type: int
@@ -117,6 +125,26 @@ button:
       - output.turn_on: out_tidur
       - delay: 5s
       - output.turn_off: out_tidur
+
+  - platform: template
+    name: "Filter Intervall Längre"
+    icon: "mdi:calendar-plus"
+    on_press:
+      - output.turn_on: out_tidur
+      - output.turn_on: out_temp_up
+      - delay: 5s
+      - output.turn_off: out_tidur
+      - output.turn_off: out_temp_up
+
+  - platform: template
+    name: "Filter Intervall Kortare"
+    icon: "mdi:calendar-minus"
+    on_press:
+      - output.turn_on: out_tidur
+      - output.turn_on: out_temp_down
+      - delay: 5s
+      - output.turn_off: out_tidur
+      - output.turn_off: out_temp_down
 
 # ─── Binary Sensors: LED Reading (pullup + inverted) ─────────────────────────
 
