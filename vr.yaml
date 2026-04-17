@@ -170,20 +170,22 @@ button:
     icon: "mdi:calendar-plus"
     on_press:
       - output.turn_on: out_tidur
+      - delay: 1s
       - output.turn_on: out_temp_up
       - delay: 300ms
-      - output.turn_off: out_tidur
       - output.turn_off: out_temp_up
+      - output.turn_off: out_tidur
 
   - platform: template
     name: "Filter Intervall Kortare"
     icon: "mdi:calendar-minus"
     on_press:
       - output.turn_on: out_tidur
+      - delay: 1s
       - output.turn_on: out_temp_down
       - delay: 300ms
-      - output.turn_off: out_tidur
       - output.turn_off: out_temp_down
+      - output.turn_off: out_tidur
 
 # ─── Binary Sensors: LED Reading (pullup + inverted) ─────────────────────────
 
