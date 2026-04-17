@@ -60,6 +60,7 @@ cards:
         tap_action:
           action: none
       - type: template
+        entity: binary_sensor.vr_filter_byte
         icon: mdi:air-filter
         content: Filter
         icon_color: >-
@@ -77,9 +78,8 @@ cards:
           {{ 'green' if is_state('binary_sensor.vr_flakt_lage_min', 'on') else
           'grey' }}
         tap_action:
-          action: call-service
-          service: script.set_fan_to_min
-          data: {}
+          action: perform-action
+          perform_action: script.set_fan_to_min
       - type: template
         icon: mdi:fan-speed-2
         content: Norm
@@ -87,9 +87,8 @@ cards:
           {{ 'orange' if is_state('binary_sensor.vr_flakt_lage_normal', 'on')
           else 'grey' }}
         tap_action:
-          action: call-service
-          service: script.set_fan_to_normal
-          data: {}
+          action: perform-action
+          perform_action: script.set_fan_to_normal
       - type: template
         icon: mdi:fan-speed-3
         content: Max
@@ -97,9 +96,8 @@ cards:
           {{ 'red' if is_state('binary_sensor.vr_flakt_lage_max', 'on') else
           'grey' }}
         tap_action:
-          action: call-service
-          service: script.set_fan_to_max_2
-          data: {}
+          action: perform-action
+          perform_action: script.set_fan_to_max_2
     alignment: center
   - type: custom:mushroom-template-card
     primary: "{{ states('sensor.vr_flakt_aktuellt_lage') }}"
@@ -129,8 +127,8 @@ cards:
         icon_color: blue
         layout: vertical
         tap_action:
-          action: call-service
-          service: switch.turn_on
+          action: perform-action
+          perform_action: switch.turn_on
           target:
             entity_id: switch.vr_flakt_ned
         card_mod:
@@ -148,8 +146,8 @@ cards:
         icon_color: blue
         layout: vertical
         tap_action:
-          action: call-service
-          service: switch.turn_on
+          action: perform-action
+          perform_action: switch.turn_on
           target:
             entity_id: switch.vr_flakt_upp
         card_mod:
@@ -174,9 +172,8 @@ cards:
       icon_color: purple
       layout: horizontal
       tap_action:
-        action: call-service
-        service: script.villavent_boost_20min
-        data: {}
+        action: perform-action
+        perform_action: script.villavent_boost_20min
       card_mod:
         style: |
           ha-card {
@@ -203,9 +200,9 @@ cards:
       bar_background: rgba(244, 67, 54, 0.2)
       text_width: 3em
       tap_action:
-        action: call-service
-        service: timer.cancel
-        service_data:
+        action: perform-action
+        perform_action: timer.cancel
+        target:
           entity_id: timer.villavent_boost_timer
       card_mod:
         style: |
@@ -232,9 +229,8 @@ cards:
           {{ 'light-blue' if is_state('sensor.vr_temp_aktuellt_lage', '0') else
           'grey' }}
         tap_action:
-          action: call-service
-          service: script.set_temp_to_0
-          data: {}
+          action: perform-action
+          perform_action: script.set_temp_to_0
       - type: template
         icon: mdi:numeric-1-circle
         content: ""
@@ -242,9 +238,8 @@ cards:
           {{ 'blue' if is_state('sensor.vr_temp_aktuellt_lage', '1') else 'grey'
           }}
         tap_action:
-          action: call-service
-          service: script.set_temp_to_1
-          data: {}
+          action: perform-action
+          perform_action: script.set_temp_to_1
       - type: template
         icon: mdi:numeric-2-circle
         content: ""
@@ -252,9 +247,8 @@ cards:
           {{ 'cyan' if is_state('sensor.vr_temp_aktuellt_lage', '2') else 'grey'
           }}
         tap_action:
-          action: call-service
-          service: script.set_temp_to_2
-          data: {}
+          action: perform-action
+          perform_action: script.set_temp_to_2
       - type: template
         icon: mdi:numeric-3-circle
         content: ""
@@ -262,9 +256,8 @@ cards:
           {{ 'green' if is_state('sensor.vr_temp_aktuellt_lage', '3') else
           'grey' }}
         tap_action:
-          action: call-service
-          service: script.set_temp_to_3
-          data: {}
+          action: perform-action
+          perform_action: script.set_temp_to_3
       - type: template
         icon: mdi:numeric-4-circle
         content: ""
@@ -272,9 +265,8 @@ cards:
           {{ 'orange' if is_state('sensor.vr_temp_aktuellt_lage', '4') else
           'grey' }}
         tap_action:
-          action: call-service
-          service: script.set_temp_to_4
-          data: {}
+          action: perform-action
+          perform_action: script.set_temp_to_4
       - type: template
         icon: mdi:numeric-5-circle
         content: ""
@@ -282,9 +274,8 @@ cards:
           {{ 'red' if is_state('sensor.vr_temp_aktuellt_lage', '5') else 'grey'
           }}
         tap_action:
-          action: call-service
-          service: script.set_temp_to_5
-          data: {}
+          action: perform-action
+          perform_action: script.set_temp_to_5
     alignment: center
   - type: custom:mushroom-template-card
     primary: |-
@@ -359,8 +350,8 @@ cards:
     icon_color: orange
     layout: horizontal
     tap_action:
-      action: call-service
-      service: button.press
+      action: perform-action
+      perform_action: button.press
       target:
         entity_id: button.vr_filter_reset
     card_mod:
@@ -382,8 +373,8 @@ cards:
         icon_color: blue
         layout: vertical
         tap_action:
-          action: call-service
-          service: button.press
+          action: perform-action
+          perform_action: button.press
           target:
             entity_id: button.vr_filter_intervall_kortare
         card_mod:
@@ -402,8 +393,8 @@ cards:
         icon_color: orange
         layout: vertical
         tap_action:
-          action: call-service
-          service: button.press
+          action: perform-action
+          perform_action: button.press
           target:
             entity_id: button.vr_filter_intervall_langre
         card_mod:
@@ -444,8 +435,8 @@ cards:
         icon_color: blue
         layout: vertical
         tap_action:
-          action: call-service
-          service: button.press
+          action: perform-action
+          perform_action: button.press
           target:
             entity_id: button.vr_normal_hastighet_lag
         card_mod:
@@ -464,8 +455,8 @@ cards:
         icon_color: orange
         layout: vertical
         tap_action:
-          action: call-service
-          service: button.press
+          action: perform-action
+          perform_action: button.press
           target:
             entity_id: button.vr_normal_hastighet_hog
         card_mod:
