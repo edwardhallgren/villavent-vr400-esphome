@@ -308,7 +308,7 @@ text_sensor:
     update_interval: 2s
     icon: "mdi:calendar-clock"
     lambda: |-
-      if (id(temp_lamp6).state) return {"Låg temp (lamp 6)"};
-      if (id(temp_lamp7).state) return {"Medel temp (lamp 7)"};
-      if (id(temp_lamp8).state) return {"Hög temp (lamp 8)"};
+      if (id(temp_lamp6).state) return {"12 mån"};
+      if (id(temp_lamp7).state) return {"9 mån"};
+      if (id(temp_lamp8).state) return {"6 mån"};
       return {"Okänt"};
