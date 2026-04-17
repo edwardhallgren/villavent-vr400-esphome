@@ -138,17 +138,6 @@ cards:
             background: rgba(244, 67, 54, 0.1);
           }
 
-  # ─── Temperaturkontroll ────────────────────────────────────────────────────
-  - type: markdown
-    content: >
-      ### 🌡️ Temperaturkontroll
-      ({% set t = states('sensor.vr_temp_aktuellt_lage') %}{% if t == '0' %}0
-      — Sommardrift{% elif t == '1' %}1 — Kallast{% elif t == '2' %}2 — Kallt{%
-      elif t == '3' %}3 — Normal{% elif t == '4' %}4 — Varmt{% elif t == '5'
-      %}5 — Varmast{% else %}Okänt{% endif %})
-    card_mod:
-      style: |
-        ha-card { background: rgba(255,255,255,0.05); text-align: center; padding: 4px; }
   - type: custom:mushroom-chips-card
     chips:
       - type: template
@@ -208,16 +197,18 @@ cards:
       style: |
         ha-card { background: rgba(255,255,255,0.05); text-align: center; padding: 4px; }
 
-  # Filter Reset
+  # Filter Reset — long-press required to avoid accidental trigger
   - type: custom:mushroom-template-card
     primary: Filter Reset
     secondary: >-
-      {{ 'Bekräftad ✓' if is_state('binary_sensor.vr_filter_reset_bekraftad', 'on') else 'Håll Tidur 5 sek' }}
+      {{ 'Bekräftad ✓' if is_state('binary_sensor.vr_filter_reset_bekraftad', 'on') else 'Håll inne för att resetta' }}
     icon: mdi:air-filter
     icon_color: >-
       {{ 'green' if is_state('binary_sensor.vr_filter_reset_bekraftad', 'on') else 'orange' }}
     layout: horizontal
     tap_action:
+      action: none
+    hold_action:
       action: perform-action
       perform_action: button.press
       target:
