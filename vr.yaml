@@ -26,6 +26,17 @@ wifi:
 
 captive_portal:
 
+globals:
+  - id: blink_counter
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+interval:
+  - interval: 2s
+    then:
+      - lambda: 'id(blink_counter) = 0;'
+
 # ─── Switches: Button Simulation (300ms pulse via optocoupler) ───────────────
 # Uses switch + auto-off so HA can call switch.turn_on directly
 
@@ -75,6 +86,23 @@ switch:
       - delay: 300ms
       - switch.turn_off: sw_tidur
 
+# ─── Admin: Normal Speed Setting ─────────────────────────────────────────────
+
+button:
+  - platform: template
+    name: "Normal Hastighet Hög"
+    icon: "mdi:fan-speed-3"
+    on_press:
+      - switch.turn_on: sw_fan_up
+      - switch.turn_on: sw_tidur
+
+  - platform: template
+    name: "Normal Hastighet Låg"
+    icon: "mdi:fan-speed-1"
+    on_press:
+      - switch.turn_on: sw_fan_down
+      - switch.turn_on: sw_tidur
+
 # ─── Binary Sensors: LED Reading (pullup + inverted) ─────────────────────────
 
 binary_sensor:
@@ -87,6 +115,8 @@ binary_sensor:
       inverted: true
     name: "Fläkt Läge Max"
     id: fan_max
+    on_state:
+      - lambda: 'id(blink_counter) += 1;'
 
   - platform: gpio
     pin:
@@ -97,6 +127,8 @@ binary_sensor:
       inverted: true
     name: "Fläkt Läge Normal"
     id: fan_normal
+    on_state:
+      - lambda: 'id(blink_counter) += 1;'
 
   - platform: gpio
     pin:
@@ -107,6 +139,8 @@ binary_sensor:
       inverted: true
     name: "Fläkt Läge Min"
     id: fan_min
+    on_state:
+      - lambda: 'id(blink_counter) += 1;'
 
   - platform: gpio
     pin:
@@ -181,7 +215,6 @@ text_sensor:
       if (id(fan_min).state)    return {"MIN"};
       return {"OKÄND"};
 
-text_sensor:
   - platform: template
     name: "Temp Aktuellt Läge"
     update_interval: 1s
@@ -197,3 +230,12 @@ text_sensor:
       if (!l6 &&  l7 &&  l8) return {"4"};
       if (!l6 && !l7 &&  l8) return {"5"};
       return {"-1"};
+
+# ─── Admin: Confirmation Blink Sensor ────────────────────────────────────────
+
+binary_sensor:
+  - platform: template
+    name: "Inställning Bekräftad"
+    icon: "mdi:led-on"
+    lambda: |-
+      return id(blink_counter) >= 6;
