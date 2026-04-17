@@ -37,7 +37,7 @@ This approach means zero direct electrical connection between the ESP32 and the 
 - Temperature setpoint control (UP / DOWN) with current state feedback (levels 0–5)
 - Filter interval presets (6 / 9 / 12 months) — auto-navigates to the target and confirms
 - 20-minute boost mode at MAX fan with live countdown, cancellable from dashboard
-- Optional status sensors: Electric heater active, Summer mode, Filter change alert
+- Status sensors: Electric heater active, Summer mode, Filter change alert
 - Full Home Assistant integration via ESPHome API
 - OTA firmware updates
 
@@ -84,12 +84,12 @@ The control panel connects to the main unit via a 16-pin FFC (flat flexible cabl
 | 7       | Fan LED — MAX       | LED    |                              |
 | 8       | Fan LED — NORMAL    | LED    |                              |
 | 9       | Fan LED — MIN       | LED    |                              |
-| 10      | Electric heater LED | LED    | Optional                     |
-| 11      | Summer mode LED     | LED    | Optional                     |
+| 10      | Electric heater LED | LED    |                              |
+| 11      | Summer mode LED     | LED    |                              |
 | 12      | Temp level 3 LED    | LED    | = Lamp 8 in ESPHome          |
 | 13      | Temp level 2 LED    | LED    | = Lamp 7 in ESPHome          |
 | 14      | Temp level 1 LED    | LED    | = Lamp 6 in ESPHome          |
-| 15      | Filter change LED   | LED    | Optional                     |
+| 15      | Filter change LED   | LED    |                              |
 | 16      | VCC for LEDs        | Power  | LED supply voltage           |
 
 For **button outputs**: connect the optocoupler output (collector/emitter) between the FFC pin and pin 5 (common).  
@@ -117,9 +117,9 @@ For **LED inputs**: connect the optocoupler LED side between FFC pin 16 (VCC) an
 | Temp lamp 6 (level 1) | 35   | 14      | Pull-up, inverted, internal         |
 | Temp lamp 7 (level 2) | 34   | 13      | Pull-up, inverted, internal         |
 | Temp lamp 8 (level 3) | 21   | 12      | Pull-up, inverted, internal         |
-| Electric heater       | 46   | 10      | Optional — comment out if not wired |
-| Summer mode           | 14   | 11      | Optional — comment out if not wired |
-| Filter change         | 18   | 15      | Optional — comment out if not wired |
+| Electric heater       | 46   | 10      | Pull-up, inverted                   |
+| Summer mode           | 14   | 11      | Pull-up, inverted                   |
+| Filter change         | 18   | 15      | Pull-up, inverted                   |
 
 ## Temperature Level Decoding
 
@@ -170,19 +170,6 @@ This decoding runs as a template sensor in ESPHome, updating every second.
    ```
 
 4. Add the device to Home Assistant via Settings > Integrations > ESPHome.
-
-### Optional Sensors
-
-Three additional binary sensors (Electric heater, Summer mode, Filter change) are included in the config but **comment them out** if you have not wired those optocouplers yet:
-
-```yaml
-# Comment these out if not yet connected:
-  - platform: gpio
-    pin:
-      number: GPIO46
-    name: "Elpatron Aktiv"
-    ...
-```
 
 ## Home Assistant Dashboard
 

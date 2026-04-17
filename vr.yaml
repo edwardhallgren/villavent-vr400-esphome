@@ -418,7 +418,6 @@ binary_sensor:
     id: temp_lamp8
     internal: true
 
-  # Optional — comment out if not yet wired
   - platform: gpio
     pin:
       number: GPIO46

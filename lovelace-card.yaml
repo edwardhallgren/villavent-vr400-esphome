@@ -2,19 +2,22 @@
 ##
 ## Requirements:
 ##   HACS frontend integrations:
-##     - mushroom            (https://github.com/piitaya/lovelace-mushroom)
-##     - card-mod            (https://github.com/thomasloven/lovelace-card-mod)
-##     - timer-bar-card      (https://github.com/rianadon/timer-bar-card)
+##     - mushroom  (https://github.com/piitaya/lovelace-mushroom)
+##     - card-mod  (https://github.com/thomasloven/lovelace-card-mod)
 ##
 ## Entity naming:
 ##   This card assumes the ESPHome device is named "vr" (producing entity IDs
 ##   like binary_sensor.vr_flakt_lage_max). If your device has a different name,
 ##   do a find-and-replace on the "vr_" prefix below.
 ##
-## Additional HA helpers required (create in Settings > Automations & Scripts/Timers):
-##   Scripts: set_fan_to_min, set_fan_to_normal, set_fan_to_max_2,
-##            set_temp_to_0…5, villavent_boost_20min
-##   Timer:   villavent_boost_timer (duration: 00:20:00)
+## HA scripts required (create in Settings > Automations & Scenes):
+##   set_fan_to_min      — press Fan DOWN until MIN LED is on
+##   set_fan_to_normal   — press until NORMAL LED is on
+##   set_fan_to_max_2    — press Fan UP until MAX LED is on
+##   set_temp_to_0 … 5  — press Temp UP/DOWN until target level matches
+##
+## Boost mode and filter interval navigation are handled entirely in ESPHome
+## (no HA timer or boost script needed).
 
 type: vertical-stack
 cards:
