@@ -248,6 +248,21 @@ binary_sensor:
     on_state:
       - lambda: 'id(blink_counter) += 1;'
 
+  # ─── Admin: Confirmation Blink Sensors ──────────────────────────────────────
+
+  - platform: template
+    name: "Inställning Bekräftad"
+    icon: "mdi:led-on"
+    lambda: |-
+      return id(blink_counter) >= 6;
+
+  - platform: template
+    name: "Filter Reset Bekräftad"
+    icon: "mdi:air-filter"
+    lambda: |-
+      return id(blink_counter) >= 4 && id(fan_max).state == false
+             && id(fan_normal).state == false && id(fan_min).state == false;
+
 # ─── Sensors: Derived State ───────────────────────────────────────────────────
 
 text_sensor:
@@ -276,23 +291,6 @@ text_sensor:
       if (!l6 && !l7 &&  l8) return {"5"};
       return {"-1"};
 
-# ─── Admin: Confirmation Blink Sensor ────────────────────────────────────────
-
-binary_sensor:
-  - platform: template
-    name: "Inställning Bekräftad"
-    icon: "mdi:led-on"
-    lambda: |-
-      return id(blink_counter) >= 6;
-
-  - platform: template
-    name: "Filter Reset Bekräftad"
-    icon: "mdi:air-filter"
-    lambda: |-
-      return id(blink_counter) >= 4 && id(fan_max).state == false
-             && id(fan_normal).state == false && id(fan_min).state == false;
-
-text_sensor:
   - platform: template
     name: "Filter Intervall"
     update_interval: 2s
