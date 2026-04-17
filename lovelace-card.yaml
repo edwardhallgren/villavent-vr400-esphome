@@ -140,8 +140,12 @@ cards:
 
   # ─── Temperaturkontroll ────────────────────────────────────────────────────
   - type: markdown
-    content: |
+    content: >
       ### 🌡️ Temperaturkontroll
+      ({% set t = states('sensor.vr_temp_aktuellt_lage') %}{% if t == '0' %}0
+      — Sommardrift{% elif t == '1' %}1 — Kallast{% elif t == '2' %}2 — Kallt{%
+      elif t == '3' %}3 — Normal{% elif t == '4' %}4 — Varmt{% elif t == '5'
+      %}5 — Varmast{% else %}Okänt{% endif %})
     card_mod:
       style: |
         ha-card { background: rgba(255,255,255,0.05); text-align: center; padding: 4px; }
@@ -196,29 +200,6 @@ cards:
           action: perform-action
           perform_action: script.set_temp_to_5
     alignment: center
-  # Compact description chip for current temperature level
-  - type: custom:mushroom-chips-card
-    chips:
-      - type: template
-        icon: mdi:thermometer
-        content: >-
-          {% set t = states('sensor.vr_temp_aktuellt_lage') %}
-          {% if t == '0' %}0 — Sommardrift
-          {% elif t == '1' %}1 — Kallast
-          {% elif t == '2' %}2 — Kallt
-          {% elif t == '3' %}3 — Normal
-          {% elif t == '4' %}4 — Varmt
-          {% elif t == '5' %}5 — Varmast
-          {% else %}Okänt{% endif %}
-        icon_color: >-
-          {% set t = states('sensor.vr_temp_aktuellt_lage') %}
-          {% if t == '0' %}light-blue{% elif t == '1' %}blue{% elif t == '2' %}cyan
-          {% elif t == '3' %}green{% elif t == '4' %}orange{% elif t == '5' %}red
-          {% else %}grey{% endif %}
-        tap_action:
-          action: none
-    alignment: center
-
   # ─── Admin ─────────────────────────────────────────────────────────────────
   - type: markdown
     content: |
@@ -227,26 +208,28 @@ cards:
       style: |
         ha-card { background: rgba(255,255,255,0.05); text-align: center; padding: 4px; }
 
-  # Filter: Reset knapp + bekräftelse + sparat intervall
-  - type: custom:mushroom-chips-card
-    chips:
-      - type: template
-        icon: mdi:air-filter
-        content: Filter Reset
-        icon_color: >-
-          {{ 'green' if is_state('binary_sensor.vr_filter_reset_bekraftad', 'on') else 'orange' }}
-        tap_action:
-          action: perform-action
-          perform_action: button.press
-          target:
-            entity_id: button.vr_filter_reset
-      - type: template
-        icon: mdi:calendar-clock
-        content: "{{ states('sensor.vr_filter_intervall_sparat') }}"
-        icon_color: blue
-        tap_action:
-          action: none
-    alignment: center
+  # Filter Reset
+  - type: custom:mushroom-template-card
+    primary: Filter Reset
+    secondary: >-
+      {{ 'Bekräftad ✓' if is_state('binary_sensor.vr_filter_reset_bekraftad', 'on') else 'Håll Tidur 5 sek' }}
+    icon: mdi:air-filter
+    icon_color: >-
+      {{ 'green' if is_state('binary_sensor.vr_filter_reset_bekraftad', 'on') else 'orange' }}
+    layout: horizontal
+    tap_action:
+      action: perform-action
+      perform_action: button.press
+      target:
+        entity_id: button.vr_filter_reset
+    card_mod:
+      style: |
+        ha-card {
+          border: 2px solid {{ 'green' if is_state('binary_sensor.vr_filter_reset_bekraftad', 'on') else '#FF9800' }};
+          background: rgba(255, 152, 0, 0.07);
+          transition: all 0.3s ease;
+        }
+        ha-card:active { transform: scale(0.97); }
 
   # Filter interval preset
   - type: custom:mushroom-chips-card
