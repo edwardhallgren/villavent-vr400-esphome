@@ -60,6 +60,11 @@ globals:
     restore_value: yes
     initial_value: '0'
 
+  - id: filter_confirmed
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
 interval:
   - interval: 2s
     then:
@@ -141,8 +146,9 @@ button:
     name: "Normal Hastighet Hög"
     icon: "mdi:fan-speed-3"
     on_press:
-      - output.turn_on: out_fan_up
       - output.turn_on: out_tidur
+      - delay: 1s
+      - output.turn_on: out_fan_up
       - delay: 300ms
       - output.turn_off: out_fan_up
       - output.turn_off: out_tidur
@@ -151,8 +157,9 @@ button:
     name: "Normal Hastighet Låg"
     icon: "mdi:fan-speed-1"
     on_press:
-      - output.turn_on: out_fan_down
       - output.turn_on: out_tidur
+      - delay: 1s
+      - output.turn_on: out_fan_down
       - delay: 300ms
       - output.turn_off: out_fan_down
       - output.turn_off: out_tidur
@@ -297,9 +304,10 @@ binary_sensor:
     lambda: |-
       return id(blink_counter) >= 6;
 
+  # Internal: fires briefly when blink pattern matches filter reset
   - platform: template
-    name: "Filter Reset Bekräftad"
-    icon: "mdi:air-filter"
+    id: filter_reset_trigger
+    internal: true
     lambda: |-
       return id(blink_counter) >= 4 && id(fan_max).state == false
              && id(fan_normal).state == false && id(fan_min).state == false;
@@ -308,11 +316,21 @@ binary_sensor:
           condition:
             lambda: 'return x;'
           then:
+            - lambda: 'id(filter_confirmed) = true;'
             - delay: 500ms
             - lambda: |-
                 if (id(temp_lamp6).state)      id(filter_intervall_manader) = 12;
                 else if (id(temp_lamp7).state) id(filter_intervall_manader) = 9;
                 else if (id(temp_lamp8).state) id(filter_intervall_manader) = 6;
+            - delay: 4500ms
+            - lambda: 'id(filter_confirmed) = false;'
+
+  # Latched: stays ON for 5s after a confirmed filter reset
+  - platform: template
+    name: "Filter Reset Bekräftad"
+    icon: "mdi:air-filter"
+    lambda: |-
+      return id(filter_confirmed);
 
 # ─── Sensors: Derived State ───────────────────────────────────────────────────
 
