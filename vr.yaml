@@ -99,26 +99,26 @@ script:
   - id: set_filter_interval_script
     mode: single
     then:
-      # Step 1: If current state is unknown, probe with one Längre press
-      # and read which temp lamp lights up to discover current state.
+      # Hold Tidur to enter filter interval configuration mode
+      - output.turn_on: out_tidur
+      - delay: 1000ms
+
+      # Step 1: If interval unknown, probe with one Längre press (Tidur still held)
+      # Read lamp BEFORE releasing Tidur so the unit is still in filter interval mode.
       - if:
           condition:
             lambda: 'return id(filter_intervall_manader) == 0;'
           then:
-            - output.turn_on: out_tidur
-            - delay: 1s
             - output.turn_on: out_temp_up
             - delay: 300ms
             - output.turn_off: out_temp_up
-            - output.turn_off: out_tidur
-            - delay: 400ms
+            - delay: 600ms
             - lambda: |-
                 if      (id(temp_lamp6).state) id(filter_intervall_manader) = 12;
                 else if (id(temp_lamp7).state) id(filter_intervall_manader) = 9;
                 else if (id(temp_lamp8).state) id(filter_intervall_manader) = 6;
-            - delay: 1200ms
 
-      # Step 2: Calculate how many steps are needed (positive = Längre, negative = Kortare)
+      # Step 2: Calculate steps from current position to target
       - lambda: |-
           int cur = id(filter_intervall_manader);
           int tgt = id(filter_target_manader);
@@ -130,40 +130,37 @@ script:
             id(nav_steps) = ti - ci;
           }
 
-      # Step 3: Press Längre for each positive step
+      # Step 3: Press Längre for each positive step (Tidur held throughout)
       - while:
           condition:
             lambda: 'return id(nav_steps) > 0;'
           then:
-            - output.turn_on: out_tidur
-            - delay: 1s
             - output.turn_on: out_temp_up
             - delay: 300ms
             - output.turn_off: out_temp_up
-            - output.turn_off: out_tidur
             - lambda: 'id(nav_steps)--;'
-            - delay: 1500ms
+            - delay: 600ms
 
-      # Step 4: Press Kortare for each negative step
+      # Step 4: Press Kortare for each negative step (Tidur held throughout)
       - while:
           condition:
             lambda: 'return id(nav_steps) < 0;'
           then:
-            - output.turn_on: out_tidur
-            - delay: 1s
             - output.turn_on: out_temp_down
             - delay: 300ms
             - output.turn_off: out_temp_down
-            - output.turn_off: out_tidur
             - lambda: 'id(nav_steps)++;'
-            - delay: 1500ms
+            - delay: 600ms
 
-      # Step 5: Confirm with 5-second Tidur (Filter Reset) — updates filter_confirmed
-      # and filter_intervall_manader via the filter_reset_trigger binary sensor.
-      - output.turn_on: out_tidur
-      - delay: 5s
+      # Step 5: Continue holding Tidur to trigger Filter Reset (total hold ≥ 5 s)
+      - delay: 4500ms
       - output.turn_off: out_tidur
-      - lambda: 'id(filter_target_manader) = 0;'
+
+      # Step 6: Save confirmed interval to the persistent global
+      - lambda: |-
+          if (id(filter_target_manader) != 0)
+            id(filter_intervall_manader) = id(filter_target_manader);
+          id(filter_target_manader) = 0;
 
   # ─── Boost: 20 minutes at max fan, then return to normal ─────────────────
   - id: boost_script
@@ -472,12 +469,7 @@ binary_sensor:
             lambda: 'return x;'
           then:
             - lambda: 'id(filter_confirmed) = true;'
-            - delay: 500ms
-            - lambda: |-
-                if (id(temp_lamp6).state)      id(filter_intervall_manader) = 12;
-                else if (id(temp_lamp7).state) id(filter_intervall_manader) = 9;
-                else if (id(temp_lamp8).state) id(filter_intervall_manader) = 6;
-            - delay: 4500ms
+            - delay: 5s
             - lambda: 'id(filter_confirmed) = false;'
 
   # Latched: stays ON for 5s after a confirmed filter reset
