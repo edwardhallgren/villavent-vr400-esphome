@@ -31,7 +31,7 @@ captive_portal:
 
 switch:
   - platform: gpio
-    pin: GPIO11
+    pin: GPIO2
     id: sw_fan_up
     name: "Fläkt Upp"
     restore_mode: ALWAYS_OFF
@@ -40,7 +40,7 @@ switch:
       - switch.turn_off: sw_fan_up
 
   - platform: gpio
-    pin: GPIO10
+    pin: GPIO1
     id: sw_fan_down
     name: "Fläkt Ned"
     restore_mode: ALWAYS_OFF
@@ -49,7 +49,7 @@ switch:
       - switch.turn_off: sw_fan_down
 
   - platform: gpio
-    pin: GPIO16
+    pin: GPIO6
     id: sw_temp_up
     name: "Temp Upp"
     restore_mode: ALWAYS_OFF
@@ -58,7 +58,7 @@ switch:
       - switch.turn_off: sw_temp_up
 
   - platform: gpio
-    pin: GPIO4
+    pin: GPIO5
     id: sw_temp_down
     name: "Temp Ned"
     restore_mode: ALWAYS_OFF
@@ -66,17 +66,26 @@ switch:
       - delay: 300ms
       - switch.turn_off: sw_temp_down
 
+  - platform: gpio
+    pin: GPIO3
+    id: sw_tidur
+    name: "Tidur"
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - delay: 300ms
+      - switch.turn_off: sw_tidur
+
 # ─── Binary Sensors: LED Reading (pullup + inverted) ─────────────────────────
 
 binary_sensor:
   - platform: gpio
     pin:
-      number: GPIO40
+      number: GPIO42
       mode:
         input: true
         pullup: true
       inverted: true
-    name: "Fan Speed MAX"
+    name: "Fläkt Läge Max"
     id: fan_max
 
   - platform: gpio
@@ -86,22 +95,22 @@ binary_sensor:
         input: true
         pullup: true
       inverted: true
-    name: "Fan Speed NORMAL"
+    name: "Fläkt Läge Normal"
     id: fan_normal
 
   - platform: gpio
     pin:
-      number: GPIO42
+      number: GPIO40
       mode:
         input: true
         pullup: true
       inverted: true
-    name: "Fan Speed MIN"
+    name: "Fläkt Läge Min"
     id: fan_min
 
   - platform: gpio
     pin:
-      number: GPIO38
+      number: GPIO35
       mode:
         input: true
         pullup: true
@@ -112,7 +121,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO39
+      number: GPIO34
       mode:
         input: true
         pullup: true
@@ -123,7 +132,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO15
+      number: GPIO21
       mode:
         input: true
         pullup: true
@@ -135,7 +144,7 @@ binary_sensor:
   # Optional — comment out if not yet wired
   - platform: gpio
     pin:
-      number: GPIO13
+      number: GPIO46
       mode:
         input: true
         pullup: true
@@ -149,22 +158,22 @@ binary_sensor:
         input: true
         pullup: true
       inverted: true
-    name: "Sommarläge"
+    name: "Sommardrift"
 
   - platform: gpio
     pin:
-      number: GPIO12
+      number: GPIO18
       mode:
         input: true
         pullup: true
       inverted: true
-    name: "Filterbyte"
+    name: "Filter Byte"
 
 # ─── Sensors: Derived State ───────────────────────────────────────────────────
 
 text_sensor:
   - platform: template
-    name: "Fläkthastighet"
+    name: "Fläkt Aktuellt Läge"
     update_interval: 1s
     lambda: |-
       if (id(fan_max).state)    return {"MAX"};
@@ -172,21 +181,19 @@ text_sensor:
       if (id(fan_min).state)    return {"MIN"};
       return {"OKÄND"};
 
-sensor:
+text_sensor:
   - platform: template
-    name: "Temperaturinställning"
+    name: "Temp Aktuellt Läge"
     update_interval: 1s
-    accuracy_decimals: 0
-    unit_of_measurement: ""
     icon: "mdi:thermometer"
     lambda: |-
       bool l6 = id(temp_lamp6).state;
       bool l7 = id(temp_lamp7).state;
       bool l8 = id(temp_lamp8).state;
-      if (!l6 && !l7 && !l8) return 0;
-      if ( l6 && !l7 && !l8) return 1;
-      if ( l6 &&  l7 && !l8) return 2;
-      if (!l6 &&  l7 && !l8) return 3;
-      if (!l6 &&  l7 &&  l8) return 4;
-      if (!l6 && !l7 &&  l8) return 5;
-      return -1;
+      if (!l6 && !l7 && !l8) return {"0"};
+      if ( l6 && !l7 && !l8) return {"1"};
+      if ( l6 &&  l7 && !l8) return {"2"};
+      if (!l6 &&  l7 && !l8) return {"3"};
+      if (!l6 &&  l7 &&  l8) return {"4"};
+      if (!l6 && !l7 &&  l8) return {"5"};
+      return {"-1"};
