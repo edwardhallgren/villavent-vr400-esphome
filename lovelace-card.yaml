@@ -119,46 +119,6 @@ cards:
           font-size: 24px !important;
           font-weight: bold !important;
         }
-  - type: horizontal-stack
-    cards:
-      - type: custom:mushroom-template-card
-        primary: Ned
-        icon: mdi:fan-chevron-down
-        icon_color: blue
-        layout: vertical
-        tap_action:
-          action: perform-action
-          perform_action: switch.turn_on
-          target:
-            entity_id: switch.vr_flakt_ned
-        card_mod:
-          style: |
-            ha-card {
-              border: 2px solid #2196F3;
-              transition: all 0.3s ease;
-            }
-            ha-card:active {
-              transform: scale(0.95);
-            }
-      - type: custom:mushroom-template-card
-        primary: Upp
-        icon: mdi:fan-chevron-up
-        icon_color: blue
-        layout: vertical
-        tap_action:
-          action: perform-action
-          perform_action: switch.turn_on
-          target:
-            entity_id: switch.vr_flakt_upp
-        card_mod:
-          style: |
-            ha-card {
-              border: 2px solid #2196F3;
-              transition: all 0.3s ease;
-            }
-            ha-card:active {
-              transform: scale(0.95);
-            }
   - type: conditional
     conditions:
       - condition: state
@@ -364,48 +324,27 @@ cards:
         ha-card:active {
           transform: scale(0.97);
         }
-  - type: horizontal-stack
-    cards:
-      - type: custom:mushroom-template-card
-        primary: Kortare
-        secondary: Tidur + Temp Ned
+  - type: custom:mushroom-chips-card
+    chips:
+      - type: template
         icon: mdi:calendar-minus
+        content: Kortare
         icon_color: blue
-        layout: vertical
         tap_action:
           action: perform-action
           perform_action: button.press
           target:
             entity_id: button.vr_filter_intervall_kortare
-        card_mod:
-          style: |
-            ha-card {
-              border: 2px solid #2196F3;
-              transition: all 0.3s ease;
-            }
-            ha-card:active {
-              transform: scale(0.95);
-            }
-      - type: custom:mushroom-template-card
-        primary: Längre
-        secondary: Tidur + Temp Upp
+      - type: template
         icon: mdi:calendar-plus
+        content: Längre
         icon_color: orange
-        layout: vertical
         tap_action:
           action: perform-action
           perform_action: button.press
           target:
             entity_id: button.vr_filter_intervall_langre
-        card_mod:
-          style: |
-            ha-card {
-              border: 2px solid #FF9800;
-              transition: all 0.3s ease;
-            }
-            ha-card:active {
-              transform: scale(0.95);
-            }
+    alignment: center
   - type: markdown
     content: |
       ### ⚙️ Admin — Normalflöde
@@ -426,45 +365,24 @@ cards:
         tap_action:
           action: none
     alignment: center
-  - type: horizontal-stack
-    cards:
-      - type: custom:mushroom-template-card
-        primary: Normal Låg
-        secondary: Tidur + Fläkt Ned
+  - type: custom:mushroom-chips-card
+    chips:
+      - type: template
         icon: mdi:fan-speed-1
+        content: Norm Låg
         icon_color: blue
-        layout: vertical
         tap_action:
           action: perform-action
           perform_action: button.press
           target:
             entity_id: button.vr_normal_hastighet_lag
-        card_mod:
-          style: |
-            ha-card {
-              border: 2px solid #2196F3;
-              transition: all 0.3s ease;
-            }
-            ha-card:active {
-              transform: scale(0.95);
-            }
-      - type: custom:mushroom-template-card
-        primary: Normal Hög
-        secondary: Tidur + Fläkt Upp
+      - type: template
         icon: mdi:fan-speed-3
+        content: Norm Hög
         icon_color: orange
-        layout: vertical
         tap_action:
           action: perform-action
           perform_action: button.press
           target:
             entity_id: button.vr_normal_hastighet_hog
-        card_mod:
-          style: |
-            ha-card {
-              border: 2px solid #FF9800;
-              transition: all 0.3s ease;
-            }
-            ha-card:active {
-              transform: scale(0.95);
-            }
+    alignment: center
